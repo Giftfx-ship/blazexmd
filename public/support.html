@@ -20,17 +20,26 @@
             --primary: #25D366;
             --primary-dark: #075E54;
             --primary-teal: #128C7E;
-            --primary-glow: rgba(37, 211, 102, 0.25);
-            --bg: #0A0A0A;
+            --primary-glow: rgba(37, 211, 102, 0.3);
+            --accent-purple: #8B5CF6;
+            --accent-blue: #3B82F6;
+            --accent-pink: #EC4899;
+            --bg-primary: #050505;
+            --bg-secondary: #0A0A0A;
             --bg-card: rgba(255,255,255,0.03);
-            --card: #1A1A1A;
-            --card-hover: #242424;
-            --text: #FFFFFF;
-            --muted: #94A3B8;
-            --border: rgba(255,255,255,0.06);
-            --radius: 16px;
+            --text-primary: #FFFFFF;
+            --text-secondary: #94A3B8;
+            --text-muted: #64748B;
+            --border-color: rgba(255,255,255,0.06);
+            --border-hover: rgba(37, 211, 102, 0.2);
+            --radius-sm: 8px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
             --radius-xl: 24px;
-            --shadow: 0 8px 40px rgba(0,0,0,0.4);
+            --radius-full: 9999px;
+            --shadow-sm: 0 2px 8px rgba(0,0,0,0.2);
+            --shadow-md: 0 8px 32px rgba(0,0,0,0.3);
+            --shadow-lg: 0 16px 64px rgba(0,0,0,0.4);
             --transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
             --success: #22C55E;
             --danger: #DC2626;
@@ -39,12 +48,26 @@
 
         body {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            background: var(--bg);
-            color: var(--text);
+            background: var(--bg-primary);
+            color: var(--text-primary);
             line-height: 1.6;
             min-height: 100vh;
             -webkit-font-smoothing: antialiased;
             overflow-x: hidden;
+        }
+
+        /* ============================================================
+           SCROLLBAR
+           ============================================================ */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: var(--bg-secondary);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: var(--primary);
+            border-radius: var(--radius-full);
         }
 
         /* ============================================================
@@ -53,8 +76,9 @@
         .bg-glow {
             position: fixed;
             inset: 0;
-            z-index: -1;
+            z-index: 0;
             overflow: hidden;
+            pointer-events: none;
         }
 
         .bg-glow .orb {
@@ -62,7 +86,7 @@
             border-radius: 50%;
             filter: blur(120px);
             opacity: 0.2;
-            animation: orbFloat 30s ease-in-out infinite alternate;
+            animation: orbFloat 35s ease-in-out infinite alternate;
         }
 
         .bg-glow .orb-1 {
@@ -72,33 +96,46 @@
             top: -300px;
             right: -200px;
             animation-delay: 0s;
+            opacity: 0.15;
         }
 
         .bg-glow .orb-2 {
             width: 500px;
             height: 500px;
-            background: var(--primary-teal);
-            bottom: -300px;
-            left: -200px;
-            animation-delay: -10s;
+            background: var(--accent-purple);
+            bottom: -250px;
+            left: -150px;
+            animation-delay: -12s;
+            opacity: 0.1;
         }
 
         .bg-glow .orb-3 {
             width: 400px;
             height: 400px;
-            background: var(--primary-dark);
+            background: var(--accent-blue);
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            animation-delay: -20s;
+            animation-delay: -24s;
+            opacity: 0.08;
         }
 
         @keyframes orbFloat {
-            0% { transform: translate(0, 0) scale(1); }
-            25% { transform: translate(60px, -80px) scale(1.1); }
-            50% { transform: translate(-40px, 70px) scale(0.9); }
-            75% { transform: translate(80px, 40px) scale(1.05); }
-            100% { transform: translate(-20px, -30px) scale(0.95); }
+            0% {
+                transform: translate(0, 0) scale(1) rotate(0deg);
+            }
+            25% {
+                transform: translate(60px, -80px) scale(1.1) rotate(5deg);
+            }
+            50% {
+                transform: translate(-40px, 70px) scale(0.9) rotate(-3deg);
+            }
+            75% {
+                transform: translate(80px, 40px) scale(1.05) rotate(8deg);
+            }
+            100% {
+                transform: translate(-20px, -30px) scale(0.95) rotate(-5deg);
+            }
         }
 
         /* ============================================================
@@ -115,23 +152,29 @@
            HEADER
            ============================================================ */
         .header {
-            padding: 18px 0;
+            padding: 16px 0;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            border-bottom: 1px solid var(--border);
-            background: rgba(10,10,10,0.75);
+            border-bottom: 1px solid var(--border-color);
+            background: rgba(5, 5, 5, 0.8);
             backdrop-filter: blur(24px);
             -webkit-backdrop-filter: blur(24px);
             position: sticky;
             top: 0;
             z-index: 100;
+            transition: all var(--transition);
+        }
+
+        .header.scrolled {
+            border-bottom-color: rgba(37, 211, 102, 0.1);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
         }
 
         .logo {
             font-size: 22px;
             font-weight: 800;
-            color: var(--text);
+            color: var(--text-primary);
             text-decoration: none;
             display: flex;
             align-items: center;
@@ -148,20 +191,20 @@
             justify-content: center;
             width: 36px;
             height: 36px;
-            background: linear-gradient(135deg, var(--primary), var(--primary-teal));
-            border-radius: 10px;
+            background: linear-gradient(135deg, var(--primary), var(--accent-purple));
+            border-radius: var(--radius-sm);
             font-size: 16px;
             font-weight: 700;
-            color: var(--bg);
+            color: var(--bg-primary);
             box-shadow: 0 4px 20px var(--primary-glow);
         }
 
         .btn-back {
             padding: 8px 20px;
             background: transparent;
-            color: var(--muted);
-            border: 1px solid var(--border);
-            border-radius: 60px;
+            color: var(--text-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-full);
             font-weight: 500;
             font-size: 13px;
             cursor: pointer;
@@ -175,7 +218,7 @@
 
         .btn-back:hover {
             border-color: var(--primary);
-            color: var(--text);
+            color: var(--text-primary);
         }
 
         /* ============================================================
@@ -183,7 +226,9 @@
            ============================================================ */
         .email-section {
             padding: 20px 0 16px;
-            border-bottom: 1px solid var(--border);
+            border-bottom: 1px solid var(--border-color);
+            position: relative;
+            z-index: 1;
         }
 
         .email-form {
@@ -203,12 +248,12 @@
         .email-form input {
             flex: 1;
             padding: 10px 16px;
-            border: 1.5px solid var(--border);
-            border-radius: 12px;
+            border: 1.5px solid var(--border-color);
+            border-radius: var(--radius-md);
             font-size: 13px;
             font-family: inherit;
-            background: rgba(255,255,255,0.04);
-            color: var(--text);
+            background: rgba(255, 255, 255, 0.03);
+            color: var(--text-primary);
             outline: none;
             transition: all var(--transition);
             min-width: 120px;
@@ -217,10 +262,11 @@
         .email-form input:focus {
             border-color: var(--primary);
             box-shadow: 0 0 0 3px var(--primary-glow);
+            background: rgba(255, 255, 255, 0.05);
         }
 
         .email-form input::placeholder {
-            color: var(--muted);
+            color: var(--text-muted);
         }
 
         .email-buttons {
@@ -232,18 +278,21 @@
         .btn {
             padding: 10px 22px;
             border: none;
-            border-radius: 60px;
+            border-radius: var(--radius-full);
             font-weight: 600;
             font-size: 13px;
             cursor: pointer;
             transition: all var(--transition);
             font-family: inherit;
             white-space: nowrap;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
         }
 
         .btn-primary {
             background: linear-gradient(135deg, var(--primary), var(--primary-teal));
-            color: var(--bg);
+            color: var(--bg-primary);
             box-shadow: 0 4px 20px var(--primary-glow);
         }
 
@@ -255,12 +304,14 @@
         .btn-primary:disabled {
             opacity: 0.4;
             cursor: not-allowed;
+            transform: none !important;
+            box-shadow: none !important;
         }
 
         .btn-outline {
             background: transparent;
-            color: var(--text);
-            border: 1.5px solid var(--border);
+            color: var(--text-primary);
+            border: 1.5px solid var(--border-color);
         }
 
         .btn-outline:hover:not(:disabled) {
@@ -275,13 +326,16 @@
 
         .status-message {
             padding: 8px 16px;
-            border-radius: 10px;
+            border-radius: var(--radius-sm);
             font-size: 13px;
             margin-top: 8px;
             display: none;
+            animation: fadeUp 0.3s ease;
         }
 
-        .status-message.show { display: block; }
+        .status-message.show {
+            display: block;
+        }
         .status-message.success {
             background: rgba(34, 197, 94, 0.1);
             color: var(--success);
@@ -300,9 +354,13 @@
 
         .info-text {
             font-size: 12px;
-            color: var(--muted);
+            color: var(--text-muted);
             margin-top: 8px;
             text-align: center;
+        }
+
+        .info-text i {
+            margin-right: 4px;
         }
 
         /* ============================================================
@@ -314,6 +372,8 @@
             flex-direction: column;
             padding: 16px 0 32px;
             max-height: calc(100vh - 300px);
+            position: relative;
+            z-index: 1;
         }
 
         .chat-status {
@@ -322,8 +382,8 @@
             gap: 12px;
             padding: 12px 18px;
             background: var(--bg-card);
-            border-radius: var(--radius);
-            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--border-color);
             margin-bottom: 12px;
             backdrop-filter: blur(10px);
         }
@@ -343,17 +403,32 @@
         }
 
         @keyframes pulseDot {
-            0%, 100% { opacity: 1; transform: scale(1); }
-            50% { opacity: 0.5; transform: scale(0.8); }
+            0%,
+            100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+            50% {
+                opacity: 0.5;
+                transform: scale(0.8);
+            }
         }
 
-        .status-info { flex: 1; }
-        .status-info .title { font-weight: 600; font-size: 14px; }
-        .status-info .sub { font-size: 12px; color: var(--muted); }
+        .status-info {
+            flex: 1;
+        }
+        .status-info .title {
+            font-weight: 600;
+            font-size: 14px;
+        }
+        .status-info .sub {
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
 
         .status-badge {
             padding: 4px 16px;
-            border-radius: 100px;
+            border-radius: var(--radius-full);
             font-size: 11px;
             font-weight: 600;
             background: rgba(37, 211, 102, 0.12);
@@ -373,8 +448,8 @@
             overflow-y: auto;
             padding: 16px 20px;
             background: var(--bg-card);
-            border-radius: var(--radius);
-            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--border-color);
             min-height: 250px;
             max-height: 400px;
             backdrop-filter: blur(10px);
@@ -389,15 +464,15 @@
         }
 
         .messages::-webkit-scrollbar-thumb {
-            background: var(--border);
-            border-radius: 4px;
+            background: var(--border-color);
+            border-radius: var(--radius-full);
         }
 
         .chat-message {
             margin-bottom: 12px;
             max-width: 85%;
             padding: 10px 16px;
-            border-radius: 16px;
+            border-radius: var(--radius-lg);
             font-size: 14px;
             line-height: 1.5;
             word-wrap: break-word;
@@ -405,27 +480,33 @@
         }
 
         @keyframes messageSlide {
-            from { opacity: 0; transform: translateY(10px) scale(0.98); }
-            to { opacity: 1; transform: translateY(0) scale(1); }
+            from {
+                opacity: 0;
+                transform: translateY(10px) scale(0.98);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
         }
 
         .chat-message.user {
             background: linear-gradient(135deg, var(--primary), var(--primary-teal));
-            color: var(--bg);
+            color: var(--bg-primary);
             margin-left: auto;
             border-bottom-right-radius: 4px;
         }
 
         .chat-message.admin {
             background: var(--bg-card);
-            color: var(--text);
-            border: 1px solid var(--border);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
             border-bottom-left-radius: 4px;
         }
 
         .chat-message.system {
-            background: rgba(255,255,255,0.02);
-            color: var(--muted);
+            background: rgba(255, 255, 255, 0.02);
+            color: var(--text-secondary);
             text-align: center;
             font-size: 12px;
             max-width: 100%;
@@ -440,7 +521,7 @@
         }
 
         .chat-message.user .sender-name {
-            color: rgba(0,0,0,0.6);
+            color: rgba(0, 0, 0, 0.6);
         }
 
         .chat-message.admin .sender-name {
@@ -455,19 +536,19 @@
         }
 
         .chat-message.user .msg-time {
-            color: rgba(0,0,0,0.5);
+            color: rgba(0, 0, 0, 0.5);
         }
 
         .chat-message .email-label {
             font-size: 10px;
-            color: var(--muted);
+            color: var(--text-secondary);
             display: block;
             margin-top: 2px;
         }
 
         .empty-messages {
             text-align: center;
-            color: var(--muted);
+            color: var(--text-secondary);
             padding: 40px 20px;
         }
 
@@ -475,6 +556,17 @@
             font-size: 48px;
             margin-bottom: 12px;
             display: block;
+            opacity: 0.5;
+        }
+
+        .empty-messages p {
+            font-size: 14px;
+        }
+
+        .empty-messages .sub {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-top: 4px;
         }
 
         /* ============================================================
@@ -485,8 +577,8 @@
             gap: 10px;
             padding: 12px 16px;
             background: var(--bg-card);
-            border-radius: var(--radius);
-            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--border-color);
             margin-top: 12px;
             backdrop-filter: blur(10px);
         }
@@ -494,12 +586,12 @@
         .input-area input {
             flex: 1;
             padding: 10px 16px;
-            border: 1.5px solid var(--border);
-            border-radius: 12px;
+            border: 1.5px solid var(--border-color);
+            border-radius: var(--radius-md);
             font-size: 13px;
             font-family: inherit;
-            background: rgba(255,255,255,0.04);
-            color: var(--text);
+            background: rgba(255, 255, 255, 0.03);
+            color: var(--text-primary);
             outline: none;
             transition: all var(--transition);
         }
@@ -510,7 +602,7 @@
         }
 
         .input-area input::placeholder {
-            color: var(--muted);
+            color: var(--text-muted);
         }
 
         .input-area input:disabled {
@@ -520,10 +612,10 @@
 
         .input-area button {
             padding: 10px 24px;
-            background: linear-gradient(135deg, var(--primary), var(--primary-teal));
-            color: var(--bg);
+            background: linear-gradient(135deg, var(--primary), var(--accent-purple));
+            color: var(--bg-primary);
             border: none;
-            border-radius: 60px;
+            border-radius: var(--radius-full);
             font-weight: 700;
             font-size: 13px;
             cursor: pointer;
@@ -531,6 +623,9 @@
             font-family: inherit;
             white-space: nowrap;
             box-shadow: 0 4px 20px var(--primary-glow);
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
         }
 
         .input-area button:hover:not(:disabled) {
@@ -547,7 +642,7 @@
             display: flex;
             justify-content: space-between;
             font-size: 11px;
-            color: var(--muted);
+            color: var(--text-secondary);
             margin-top: 8px;
             padding: 0 4px;
         }
@@ -563,8 +658,8 @@
             margin-top: 16px;
             padding: 16px 20px;
             background: var(--bg-card);
-            border-radius: var(--radius);
-            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--border-color);
             backdrop-filter: blur(10px);
         }
 
@@ -572,7 +667,14 @@
             font-size: 13px;
             font-weight: 600;
             margin-bottom: 10px;
-            color: var(--muted);
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .support-numbers-section h4 i {
+            color: var(--primary);
         }
 
         .support-numbers-list {
@@ -586,18 +688,19 @@
             align-items: center;
             gap: 12px;
             padding: 8px 14px;
-            background: rgba(255,255,255,0.02);
-            border-radius: 10px;
-            border: 1px solid var(--border);
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--border-color);
             transition: all var(--transition);
             text-decoration: none;
-            color: var(--text);
+            color: var(--text-primary);
             font-size: 13px;
         }
 
         .support-number-item:hover {
             border-color: var(--primary);
             background: rgba(37, 211, 102, 0.04);
+            transform: translateX(4px);
         }
 
         .support-number-item .flag {
@@ -613,7 +716,7 @@
         }
 
         .support-number-item .info .phone {
-            color: var(--muted);
+            color: var(--text-secondary);
             font-size: 12px;
         }
 
@@ -625,10 +728,10 @@
         .empty-support {
             padding: 12px;
             text-align: center;
-            color: var(--muted);
+            color: var(--text-secondary);
             font-size: 13px;
-            border: 1px dashed var(--border);
-            border-radius: 10px;
+            border: 1px dashed var(--border-color);
+            border-radius: var(--radius-sm);
         }
 
         /* ============================================================
@@ -639,19 +742,19 @@
             bottom: 24px;
             left: 50%;
             transform: translateX(-50%) translateY(100px);
-            background: var(--card);
-            color: var(--text);
+            background: var(--bg-secondary);
+            color: var(--text-primary);
             padding: 12px 24px;
-            border-radius: var(--radius);
-            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--border-color);
             font-size: 13px;
             font-weight: 500;
-            z-index: 999;
+            z-index: 9999;
             opacity: 0;
             transition: all 0.4s ease;
             max-width: 90%;
             text-align: center;
-            box-shadow: var(--shadow);
+            box-shadow: var(--shadow-lg);
         }
 
         .toast.show {
@@ -669,6 +772,20 @@
 
         .toast.warning {
             border-color: var(--warning);
+        }
+
+        /* ============================================================
+           ANIMATIONS
+           ============================================================ */
+        @keyframes fadeUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         /* ============================================================
@@ -693,6 +810,7 @@
                 text-align: center;
                 font-size: 12px;
                 padding: 8px 12px;
+                justify-content: center;
             }
             .messages {
                 min-height: 180px;
@@ -710,6 +828,7 @@
             }
             .input-area button {
                 width: 100%;
+                justify-content: center;
             }
             .support-numbers-section {
                 padding: 12px 16px;
@@ -732,12 +851,12 @@
             .chat-status {
                 padding: 10px 14px;
             }
-        }
-
-        @media (max-width: 480px) {
             .container {
                 padding: 0 16px;
             }
+        }
+
+        @media (max-width: 480px) {
             .messages {
                 max-height: 220px;
                 min-height: 150px;
@@ -757,6 +876,12 @@
                 font-size: 12px;
                 padding: 10px 16px;
             }
+            .chat-status {
+                flex-wrap: wrap;
+            }
+            .status-badge {
+                margin-left: auto;
+            }
         }
     </style>
 </head>
@@ -770,7 +895,7 @@
     </div>
 
     <!-- ============ HEADER ============ -->
-    <header class="header">
+    <header class="header" id="header">
         <div class="container" style="display:flex; justify-content:space-between; align-items:center; width:100%;">
             <a href="/" class="logo">
                 <span class="logo-icon">⚡</span>
@@ -825,7 +950,7 @@
                 <div class="empty-messages" id="emptyMessages">
                     <span class="icon">💬</span>
                     <p>Enter your email above to start chatting</p>
-                    <p style="font-size:12px; margin-top:4px; color:var(--muted);">We typically reply within seconds</p>
+                    <div class="sub">We typically reply within seconds</div>
                 </div>
             </div>
 
@@ -968,16 +1093,21 @@
                 const res = await fetch('/api/support');
                 const data = await res.json();
                 if (data && data.length > 0) {
-                    supportNumbers.innerHTML = data.map(s => `
-                        <a href="https://wa.me/${s.phone}" target="_blank" class="support-number-item">
-                            <span class="flag">${s.countryFlag}</span>
-                            <div class="info">
-                                <div class="name">${s.name}</div>
-                                <div class="phone">${s.countryCode} ${s.phone}</div>
-                            </div>
-                            <span class="whatsapp-icon"><i class="fab fa-whatsapp"></i></span>
-                        </a>
-                    `).join('');
+                    supportNumbers.innerHTML = data.map(s => {
+                        const fullNumber = s.phone.replace(/\s/g, '');
+                        const waLink = `https://wa.me/${fullNumber}`;
+
+                        return `
+                            <a href="${waLink}" target="_blank" class="support-number-item">
+                                <span class="flag">${s.countryFlag}</span>
+                                <div class="info">
+                                    <div class="name">${s.name}</div>
+                                    <div class="phone">${s.countryCode} ${s.phone}</div>
+                                </div>
+                                <span class="whatsapp-icon"><i class="fab fa-whatsapp"></i></span>
+                            </a>
+                        `;
+                    }).join('');
                     supportNumbers.style.display = 'flex';
                     emptySupport.style.display = 'none';
                 } else {
@@ -1001,10 +1131,10 @@
 
             const div = document.createElement('div');
             div.className = `chat-message ${isSystem ? 'system' : isAdmin ? 'admin' : 'user'}`;
-            
+
             let html = '';
-            
-            // ✅ Show sender name like WhatsApp
+
+            // Show sender name like WhatsApp
             if (isAdmin && adminNameText && !isSystem) {
                 html += `<span class="sender-name">👤 ${adminNameText}</span>`;
             } else if (!isAdmin && !isSystem && email) {
@@ -1012,7 +1142,7 @@
             } else if (!isAdmin && !isSystem) {
                 html += `<span class="sender-name">👤 You</span>`;
             }
-            
+
             html += message;
             if (email && !isSystem) {
                 html += `<span class="email-label">📧 ${email}</span>`;
@@ -1064,16 +1194,16 @@
                     userEmail = email;
                     userName = name;
                     isChatActive = true;
-                    
+
                     loadMessages(data.messages);
                     chatTitle.textContent = `💬 ${email} (${data.totalMessages} messages)`;
-                    
+
                     chatInput.disabled = false;
                     chatSendBtn.disabled = false;
                     chatInput.placeholder = 'Type your message...';
-                    
+
                     connectSocket();
-                    
+
                     showStatus(`✅ Welcome back! ${data.totalMessages} messages loaded`, 'success');
                     showToast(`✅ Loaded ${data.totalMessages} messages`, 'success');
                 } else {
@@ -1119,19 +1249,19 @@
                     userEmail = email;
                     userName = name;
                     isChatActive = true;
-                    
+
                     messages.innerHTML = '';
                     emptyMessages.style.display = 'block';
                     chatTitle.textContent = `💬 ${email} (New)`;
-                    
+
                     chatInput.disabled = false;
                     chatSendBtn.disabled = false;
                     chatInput.placeholder = 'Type your message...';
-                    
+
                     connectSocket();
-                    
+
                     addMessageToUI('👋 New conversation started! How can we help you?', true, 'Support Team', false, email);
-                    
+
                     showStatus('✅ New conversation started!', 'success');
                     showToast('✅ New conversation created!', 'success');
                 } else {
@@ -1240,12 +1370,22 @@
             });
         }
 
+        // ============ HEADER SCROLL ============
+        window.addEventListener('scroll', function() {
+            const header = document.getElementById('header');
+            if (window.scrollY > 50) {
+                header.classList.add('scrolled');
+            } else {
+                header.classList.remove('scrolled');
+            }
+        });
+
         // ============ INIT ============
         async function init() {
             await fetchSettings();
             await fetchSupportNumbers();
             updateButtons();
-            
+
             console.log('🚀 BLAZE-XMD Support Chat loaded');
             console.log('💬 Email form always visible');
         }
