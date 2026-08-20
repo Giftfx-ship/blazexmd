@@ -18,9 +18,11 @@ const io = socketIO(server, {
   }
 });
 
-// Middleware
+// ============ MIDDLEWARE ============
 app.use(cors());
 app.use(express.json());
+
+// ✅ Serve static files from 'public' folder
 app.use(express.static(path.join(__dirname, 'public')));
 
 const limiter = rateLimit({
@@ -29,16 +31,17 @@ const limiter = rateLimit({
 });
 app.use('/api/', limiter);
 
-// Database
+// ============ DATABASE ============
 mongoose.connect(process.env.MONGODB_URI, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
 })
 .then(() => console.log('✅ Database Connected'))
-.catch(err => console.error('❌ Database Error:', err));
+.catch(err => {
+  console.error('❌ Database Error:', err.message);
+});
 
 // ============ MODELS ============
-
 const ChatMessageSchema = new mongoose.Schema({
   visitorId: { type: String, required: true },
   name: { type: String, default: 'Guest' },
@@ -101,24 +104,28 @@ const authenticate = async (req, res, next) => {
 
 // ============ INITIALIZE ============
 (async () => {
-  const existingAdmin = await Admin.findOne({ username: process.env.ADMIN_USERNAME });
-  if (!existingAdmin) {
-    const hashedPassword = await bcrypt.hash(process.env.ADMIN_PASSWORD, 10);
-    await Admin.create({
-      username: process.env.ADMIN_USERNAME,
-      password: hashedPassword
-    });
-    console.log('✅ Admin created');
-  }
+  try {
+    const existingAdmin = await Admin.findOne({ username: process.env.ADMIN_USERNAME });
+    if (!existingAdmin) {
+      const hashedPassword = await bcrypt.hash(process.env.ADMIN_PASSWORD, 10);
+      await Admin.create({
+        username: process.env.ADMIN_USERNAME,
+        password: hashedPassword
+      });
+      console.log('✅ Admin created');
+    }
 
-  const existingSettings = await Settings.findOne();
-  if (!existingSettings) {
-    await Settings.create({
-      isOnline: true,
-      adminName: 'Support Team',
-      welcomeMessage: 'Hello! How can I help you?'
-    });
-    console.log('✅ Settings created');
+    const existingSettings = await Settings.findOne();
+    if (!existingSettings) {
+      await Settings.create({
+        isOnline: true,
+        adminName: 'Support Team',
+        welcomeMessage: 'Hello! How can I help you?'
+      });
+      console.log('✅ Settings created');
+    }
+  } catch (err) {
+    console.error('⚠️ Init error:', err.message);
   }
 })();
 
@@ -268,7 +275,6 @@ app.delete('/api/admin/message/:id', authenticate, async (req, res) => {
 });
 
 // ============ SOCKET.IO ============
-
 io.on('connection', (socket) => {
   console.log('🔌 New connection:', socket.id);
 
@@ -297,8 +303,6 @@ io.on('connection', (socket) => {
         },
         { upsert: true }
       );
-      
-      const settings = await Settings.findOne();
       
       io.emit('new-message', {
         visitorId,
@@ -357,19 +361,19 @@ io.on('connection', (socket) => {
   });
 });
 
-// ============ SERVE FRONTEND - CLEAN URLs ============
+// ============ ROUTES ============
 
-// Landing page
+// ✅ Landing page
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-// Support page - /support (clean URL)
+// ✅ Support page
 app.get('/support', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'support.html'));
 });
 
-// Admin page - /blazesupport (custom URL)
+// ✅ Admin page
 app.get('/blazesupport', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'admin.html'));
 });
