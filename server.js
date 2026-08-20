@@ -39,7 +39,6 @@ mongoose.connect(process.env.MONGODB_URI, {
 
 // ============ MODELS ============
 
-// ✅ Chat Message Schema
 const ChatMessageSchema = new mongoose.Schema({
   visitorId: { type: String, required: true, index: true },
   name: { type: String, default: 'Guest' },
@@ -50,7 +49,6 @@ const ChatMessageSchema = new mongoose.Schema({
   timestamp: { type: Date, default: Date.now }
 });
 
-// ✅ Chat Session Schema - Stores every user session
 const ChatSessionSchema = new mongoose.Schema({
   visitorId: { type: String, required: true, unique: true },
   name: { type: String, default: 'Guest' },
@@ -61,7 +59,6 @@ const ChatSessionSchema = new mongoose.Schema({
   createdAt: { type: Date, default: Date.now }
 });
 
-// ✅ Support Number Schema
 const SupportSchema = new mongoose.Schema({
   name: { type: String, required: true },
   phone: { type: String, required: true },
@@ -70,14 +67,12 @@ const SupportSchema = new mongoose.Schema({
   isActive: { type: Boolean, default: true }
 });
 
-// ✅ Settings Schema
 const SettingsSchema = new mongoose.Schema({
   isOnline: { type: Boolean, default: true },
   adminName: { type: String, default: 'Support Team' },
   welcomeMessage: { type: String, default: 'Hello! How can I help you?' }
 });
 
-// ✅ Admin Schema
 const AdminSchema = new mongoose.Schema({
   username: { type: String, required: true, unique: true },
   password: { type: String, required: true }
@@ -225,7 +220,7 @@ app.delete('/api/admin/support/:id', authenticate, async (req, res) => {
 
 // ============ CHAT API ROUTES ============
 
-// ✅ Get or create session for visitor
+// Get or create session for visitor
 app.post('/api/chat/session', async (req, res) => {
   try {
     const { visitorId, name } = req.body;
@@ -245,9 +240,8 @@ app.post('/api/chat/session', async (req, res) => {
         unreadCount: 0,
         totalMessages: 0
       });
-      console.log(`✅ New session created: ${visitorId} (${session.name})`);
+      console.log(`✅ New session created: ${visitorId}`);
     } else {
-      // Update name if provided and different
       if (name && name !== 'Guest' && session.name === 'Guest') {
         session.name = name;
         await session.save();
@@ -260,25 +254,19 @@ app.post('/api/chat/session', async (req, res) => {
   }
 });
 
-// ✅ Get chat history for a visitor
+// Get chat history for a visitor
 app.get('/api/chat/messages/:visitorId', async (req, res) => {
   try {
     const { visitorId } = req.params;
     const messages = await ChatMessage.find({ visitorId }).sort({ timestamp: 1 });
-    
-    // Get session info
     const session = await ChatSession.findOne({ visitorId });
-    
-    res.json({ 
-      messages,
-      session: session || null
-    });
+    res.json({ messages, session });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 });
 
-// ✅ Send message (visitor)
+// Send message (visitor)
 app.post('/api/chat/send', async (req, res) => {
   try {
     const { visitorId, name, message } = req.body;
@@ -287,7 +275,6 @@ app.post('/api/chat/send', async (req, res) => {
       return res.status(400).json({ error: 'visitorId and message required' });
     }
     
-    // Save message
     const newMessage = await ChatMessage.create({
       visitorId,
       name: name || 'Guest',
@@ -296,52 +283,37 @@ app.post('/api/chat/send', async (req, res) => {
       isRead: false
     });
     
-    // Update or create session
     const session = await ChatSession.findOneAndUpdate(
       { visitorId },
       {
-        $set: { 
-          lastMessageAt: new Date(),
-          name: name || 'Guest',
-          isActive: true
-        },
-        $inc: { 
-          unreadCount: 1,
-          totalMessages: 1
-        }
+        $set: { lastMessageAt: new Date(), name: name || 'Guest', isActive: true },
+        $inc: { unreadCount: 1, totalMessages: 1 }
       },
-      { 
-        upsert: true, 
-        new: true 
-      }
+      { upsert: true, new: true }
     );
     
-    // ✅ Emit to admin (real-time)
     io.emit('new-message', {
       visitorId,
       name: name || 'Guest',
       message,
       timestamp: newMessage.timestamp,
       isFromAdmin: false,
-      session: session
+      session
     });
     
-    // ✅ Emit unread count update
     const unreadCount = await ChatMessage.countDocuments({ isRead: false, isFromAdmin: false });
     io.emit('unread-update', { unread: unreadCount });
     
-    res.json({ 
-      success: true, 
-      message: newMessage,
-      session: session
-    });
+    res.json({ success: true, message: newMessage, session });
   } catch (error) {
     console.error('❌ Error sending message:', error);
     res.status(500).json({ error: error.message });
   }
 });
 
-// ✅ Get all chat sessions (admin only)
+// ============ ADMIN CHAT ROUTES ============
+
+// Get all chat sessions (admin only)
 app.get('/api/admin/sessions', authenticate, async (req, res) => {
   try {
     const sessions = await ChatSession.find().sort({ lastMessageAt: -1 });
@@ -351,41 +323,35 @@ app.get('/api/admin/sessions', authenticate, async (req, res) => {
   }
 });
 
-// ✅ Get messages for a session (admin only)
+// Get messages for a session (admin only)
 app.get('/api/admin/session/:visitorId/messages', authenticate, async (req, res) => {
   try {
     const { visitorId } = req.params;
     const messages = await ChatMessage.find({ visitorId }).sort({ timestamp: 1 });
     
-    // ✅ Mark messages as read
+    // Mark messages as read
     await ChatMessage.updateMany(
       { visitorId, isRead: false },
       { isRead: true }
     );
     
-    // ✅ Reset unread count
     await ChatSession.findOneAndUpdate(
       { visitorId },
       { unreadCount: 0 }
     );
     
-    // Get updated session
     const session = await ChatSession.findOne({ visitorId });
     
-    // ✅ Emit unread count update
     const unreadCount = await ChatMessage.countDocuments({ isRead: false, isFromAdmin: false });
     io.emit('unread-update', { unread: unreadCount });
     
-    res.json({ 
-      messages,
-      session: session || null
-    });
+    res.json({ messages, session });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 });
 
-// ✅ Get unread count (admin only)
+// Get unread count (admin only)
 app.get('/api/admin/unread-count', authenticate, async (req, res) => {
   try {
     const count = await ChatMessage.countDocuments({ isRead: false, isFromAdmin: false });
@@ -407,7 +373,6 @@ app.post('/api/admin/reply', authenticate, async (req, res) => {
     const settings = await Settings.findOne();
     const adminName = settings?.adminName || 'Support Team';
     
-    // Save admin message
     const newMessage = await ChatMessage.create({
       visitorId,
       message,
@@ -416,47 +381,90 @@ app.post('/api/admin/reply', authenticate, async (req, res) => {
       isRead: true
     });
     
-    // Update session
     await ChatSession.findOneAndUpdate(
       { visitorId },
       {
-        $set: { 
-          lastMessageAt: new Date(),
-          isActive: true
-        },
+        $set: { lastMessageAt: new Date(), isActive: true },
         $inc: { totalMessages: 1 }
       }
     );
     
-    // ✅ Emit to visitor (real-time)
     io.to(visitorId).emit('admin-reply', {
       message,
       adminName,
       timestamp: newMessage.timestamp
     });
     
-    res.json({ 
-      success: true, 
-      message: newMessage 
-    });
+    res.json({ success: true, message: newMessage });
   } catch (error) {
     console.error('❌ Error sending admin reply:', error);
     res.status(500).json({ error: error.message });
   }
 });
 
-// ✅ Delete message (admin only)
+// ✅ DELETE SINGLE MESSAGE (admin only)
 app.delete('/api/admin/message/:id', authenticate, async (req, res) => {
   try {
     const { id } = req.params;
-    const deleted = await ChatMessage.findByIdAndDelete(id);
     
-    if (!deleted) {
+    const message = await ChatMessage.findById(id);
+    if (!message) {
       return res.status(404).json({ error: 'Message not found' });
     }
     
-    res.json({ success: true });
+    const visitorId = message.visitorId;
+    
+    // Delete the message
+    await ChatMessage.findByIdAndDelete(id);
+    
+    // Update session total messages
+    const totalMessages = await ChatMessage.countDocuments({ visitorId });
+    await ChatSession.findOneAndUpdate(
+      { visitorId },
+      { totalMessages: totalMessages }
+    );
+    
+    // Emit deletion event to both admin and user
+    io.emit('message-deleted', { 
+      messageId: id, 
+      visitorId: visitorId,
+      isFromAdmin: message.isFromAdmin
+    });
+    
+    res.json({ success: true, message: 'Message deleted' });
   } catch (error) {
+    console.error('❌ Error deleting message:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// ✅ CLEAR ALL MESSAGES FOR A SESSION (admin only)
+app.delete('/api/admin/session/:visitorId/messages', authenticate, async (req, res) => {
+  try {
+    const { visitorId } = req.params;
+    
+    // Delete all messages for this visitor
+    const result = await ChatMessage.deleteMany({ visitorId });
+    
+    // Reset session total messages
+    await ChatSession.findOneAndUpdate(
+      { visitorId },
+      { 
+        totalMessages: 0,
+        unreadCount: 0
+      }
+    );
+    
+    // Emit clear event to both admin and user
+    io.emit('session-cleared', { visitorId });
+    
+    res.json({ 
+      success: true, 
+      message: `Cleared ${result.deletedCount} messages`,
+      deletedCount: result.deletedCount
+    });
+  } catch (error) {
+    console.error('❌ Error clearing messages:', error);
     res.status(500).json({ error: error.message });
   }
 });
@@ -465,20 +473,16 @@ app.delete('/api/admin/message/:id', authenticate, async (req, res) => {
 io.on('connection', (socket) => {
   console.log('🔌 New connection:', socket.id);
 
-  // ✅ Visitor joins their room
   socket.on('join-room', (visitorId) => {
     socket.join(visitorId);
     console.log(`👤 Visitor ${visitorId} joined room`);
   });
 
-  // ✅ Visitor sends message
   socket.on('visitor-message', async (data) => {
     try {
       const { visitorId, name, message } = data;
-      
       if (!visitorId || !message) return;
       
-      // Save message
       const newMessage = await ChatMessage.create({
         visitorId,
         name: name || 'Guest',
@@ -487,34 +491,24 @@ io.on('connection', (socket) => {
         isRead: false
       });
       
-      // Update session
       const session = await ChatSession.findOneAndUpdate(
         { visitorId },
         {
-          $set: { 
-            lastMessageAt: new Date(),
-            name: name || 'Guest',
-            isActive: true
-          },
-          $inc: { 
-            unreadCount: 1,
-            totalMessages: 1
-          }
+          $set: { lastMessageAt: new Date(), name: name || 'Guest', isActive: true },
+          $inc: { unreadCount: 1, totalMessages: 1 }
         },
         { upsert: true, new: true }
       );
       
-      // Emit to admin
       io.emit('new-message', {
         visitorId,
         name: name || 'Guest',
         message,
         timestamp: newMessage.timestamp,
         isFromAdmin: false,
-        session: session
+        session
       });
       
-      // Emit unread count
       const unreadCount = await ChatMessage.countDocuments({ isRead: false, isFromAdmin: false });
       io.emit('unread-update', { unread: unreadCount });
       
@@ -523,11 +517,9 @@ io.on('connection', (socket) => {
     }
   });
 
-  // ✅ Admin sends message
   socket.on('admin-message', async (data) => {
     try {
       const { visitorId, message } = data;
-      
       if (!visitorId || !message) return;
       
       const settings = await Settings.findOne();
@@ -549,7 +541,6 @@ io.on('connection', (socket) => {
         }
       );
       
-      // Emit to visitor
       io.to(visitorId).emit('admin-reply', {
         message,
         adminName,
