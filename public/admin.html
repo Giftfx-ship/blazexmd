@@ -1007,7 +1007,6 @@
             replyArea.classList.add('active');
             clearSessionBtn.style.display = 'inline-block';
             
-            // Get session info to show email
             try {
                 const res = await fetch(`/api/chat/messages/${visitorId}`);
                 const data = await res.json();
