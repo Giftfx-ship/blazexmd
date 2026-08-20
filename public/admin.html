@@ -1,0 +1,1373 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Admin · BLAZE-XMD</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #25D366;
+            --primary-dark: #075E54;
+            --primary-teal: #128C7E;
+            --bg: #0A0A0A;
+            --card: #1A1A1A;
+            --card-hover: #242424;
+            --text: #FFFFFF;
+            --muted: #94A3B8;
+            --border: #2A2A2A;
+            --radius: 16px;
+            --shadow: 0 8px 32px rgba(0,0,0,0.3);
+            --transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            --danger: #DC2626;
+            --success: #22C55E;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1120px;
+            margin: 0 auto;
+            padding: 0 24px;
+            width: 100%;
+        }
+
+        /* ============ HEADER ============ */
+        .header {
+            padding: 16px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border);
+            background: rgba(10,10,10,0.9);
+            backdrop-filter: blur(12px);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .logo {
+            font-size: 20px;
+            font-weight: 800;
+            color: var(--text);
+            text-decoration: none;
+        }
+
+        .logo span {
+            color: var(--primary);
+        }
+
+        .logo-icon {
+            display: inline-block;
+            width: 32px;
+            height: 32px;
+            background: var(--primary);
+            border-radius: 8px;
+            text-align: center;
+            line-height: 32px;
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--bg);
+            margin-right: 8px;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .status-toggle {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 14px;
+            border-radius: 100px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            border: 1px solid var(--border);
+            background: var(--card);
+            transition: all var(--transition);
+            font-family: inherit;
+            color: var(--text);
+        }
+
+        .status-toggle:hover {
+            border-color: var(--primary);
+        }
+
+        .status-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+
+        .status-dot.online {
+            background: var(--success);
+        }
+
+        .status-dot.offline {
+            background: var(--danger);
+        }
+
+        .btn-logout {
+            padding: 8px 18px;
+            background: transparent;
+            color: var(--muted);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            font-weight: 500;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all var(--transition);
+            font-family: inherit;
+        }
+
+        .btn-logout:hover {
+            border-color: var(--danger);
+            color: var(--danger);
+        }
+
+        /* ============ LOGIN ============ */
+        .login-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 80vh;
+        }
+
+        .login-card {
+            background: var(--card);
+            padding: 40px 36px;
+            border-radius: var(--radius);
+            border: 1px solid var(--border);
+            max-width: 400px;
+            width: 100%;
+        }
+
+        .login-card h2 {
+            font-size: 24px;
+            font-weight: 800;
+            margin-bottom: 8px;
+        }
+
+        .login-card p {
+            color: var(--muted);
+            font-size: 14px;
+            margin-bottom: 24px;
+        }
+
+        .login-card input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1.5px solid var(--border);
+            border-radius: 10px;
+            font-size: 14px;
+            font-family: inherit;
+            background: var(--bg);
+            color: var(--text);
+            outline: none;
+            transition: border-color var(--transition);
+            margin-bottom: 12px;
+        }
+
+        .login-card input:focus {
+            border-color: var(--primary);
+        }
+
+        .login-card .btn {
+            width: 100%;
+            padding: 12px;
+            background: var(--primary);
+            color: var(--bg);
+            border: none;
+            border-radius: 10px;
+            font-weight: 700;
+            font-size: 15px;
+            cursor: pointer;
+            transition: all var(--transition);
+            font-family: inherit;
+        }
+
+        .login-card .btn:hover {
+            background: var(--primary-teal);
+            transform: translateY(-2px);
+        }
+
+        .login-error {
+            color: var(--danger);
+            font-size: 13px;
+            margin-bottom: 12px;
+            display: none;
+        }
+
+        .login-error.show {
+            display: block;
+        }
+
+        /* ============ DASHBOARD ============ */
+        .dashboard {
+            display: none;
+            padding: 24px 0 40px;
+        }
+
+        .dashboard.active {
+            display: block;
+        }
+
+        /* Stats */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+            margin-bottom: 28px;
+        }
+
+        .stat-card {
+            background: var(--card);
+            padding: 18px 20px;
+            border-radius: var(--radius);
+            border: 1px solid var(--border);
+        }
+
+        .stat-card .number {
+            font-size: 28px;
+            font-weight: 800;
+            color: var(--primary);
+        }
+
+        .stat-card .label {
+            font-size: 12px;
+            color: var(--muted);
+            font-weight: 500;
+        }
+
+        /* ============ SECTIONS ============ */
+        .section {
+            background: var(--card);
+            padding: 24px;
+            border-radius: var(--radius);
+            border: 1px solid var(--border);
+            margin-bottom: 24px;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .section-title {
+            font-size: 18px;
+            font-weight: 700;
+        }
+
+        .section-title small {
+            font-weight: 400;
+            color: var(--muted);
+            font-size: 13px;
+        }
+
+        .btn-add {
+            padding: 8px 18px;
+            background: var(--primary);
+            color: var(--bg);
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all var(--transition);
+            font-family: inherit;
+        }
+
+        .btn-add:hover {
+            transform: scale(1.02);
+            box-shadow: 0 4px 16px rgba(37, 211, 102, 0.3);
+        }
+
+        .btn-danger {
+            padding: 6px 14px;
+            background: var(--danger);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all var(--transition);
+            font-family: inherit;
+        }
+
+        .btn-danger:hover {
+            opacity: 0.8;
+        }
+
+        .btn-edit {
+            padding: 6px 14px;
+            background: var(--primary-teal);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all var(--transition);
+            font-family: inherit;
+        }
+
+        .btn-edit:hover {
+            opacity: 0.8;
+        }
+
+        /* ============ SUPPORT NUMBERS TABLE ============ */
+        .table-wrap {
+            overflow-x: auto;
+        }
+
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+
+        .table th {
+            text-align: left;
+            padding: 10px 12px;
+            color: var(--muted);
+            font-weight: 600;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .table td {
+            padding: 10px 12px;
+            border-bottom: 1px solid var(--border);
+            vertical-align: middle;
+        }
+
+        .table .flag {
+            font-size: 20px;
+        }
+
+        .table .actions {
+            display: flex;
+            gap: 6px;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 32px 20px;
+            color: var(--muted);
+        }
+
+        /* ============ CHAT SESSIONS ============ */
+        .chat-session {
+            padding: 12px 16px;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: all var(--transition);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .chat-session:hover {
+            border-color: var(--primary);
+            background: rgba(37, 211, 102, 0.03);
+        }
+
+        .chat-session.active {
+            border-color: var(--primary);
+            background: rgba(37, 211, 102, 0.05);
+        }
+
+        .chat-session .info .name {
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .chat-session .info .preview {
+            font-size: 13px;
+            color: var(--muted);
+        }
+
+        .chat-session .meta {
+            font-size: 12px;
+            color: var(--muted);
+            text-align: right;
+        }
+
+        .chat-session .badge-unread {
+            background: var(--danger);
+            color: white;
+            padding: 2px 10px;
+            border-radius: 100px;
+            font-size: 11px;
+            font-weight: 700;
+        }
+
+        /* ============ CHAT PREVIEW ============ */
+        .chat-preview {
+            margin-top: 16px;
+            padding: 16px;
+            background: var(--bg);
+            border-radius: var(--radius);
+            border: 1px solid var(--border);
+            max-height: 300px;
+            overflow-y: auto;
+            display: none;
+        }
+
+        .chat-preview.active {
+            display: block;
+        }
+
+        .chat-preview .msg {
+            padding: 8px 12px;
+            margin-bottom: 6px;
+            border-radius: 8px;
+            font-size: 13px;
+        }
+
+        .chat-preview .msg.user {
+            background: var(--primary);
+            color: var(--bg);
+            text-align: right;
+        }
+
+        .chat-preview .msg.admin {
+            background: var(--card-hover);
+            border: 1px solid var(--border);
+        }
+
+        .chat-preview .msg .time {
+            font-size: 10px;
+            opacity: 0.6;
+            display: block;
+            margin-top: 2px;
+        }
+
+        .chat-preview .msg .admin-name {
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--primary);
+            display: block;
+        }
+
+        /* ============ REPLY INPUT ============ */
+        .reply-area {
+            display: flex;
+            gap: 10px;
+            margin-top: 12px;
+            display: none;
+        }
+
+        .reply-area.active {
+            display: flex;
+        }
+
+        .reply-area input {
+            flex: 1;
+            padding: 10px 14px;
+            border: 1.5px solid var(--border);
+            border-radius: 10px;
+            font-size: 14px;
+            font-family: inherit;
+            background: var(--bg);
+            color: var(--text);
+            outline: none;
+            transition: border-color var(--transition);
+        }
+
+        .reply-area input:focus {
+            border-color: var(--primary);
+        }
+
+        .reply-area button {
+            padding: 10px 24px;
+            background: var(--primary);
+            color: var(--bg);
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all var(--transition);
+            font-family: inherit;
+        }
+
+        .reply-area button:hover {
+            background: var(--primary-teal);
+        }
+
+        /* ============ ADD SUPPORT MODAL ============ */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.7);
+            backdrop-filter: blur(8px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal {
+            background: var(--card);
+            padding: 32px 28px;
+            border-radius: var(--radius);
+            max-width: 440px;
+            width: 90%;
+            border: 1px solid var(--border);
+            animation: fadeUp 0.3s ease;
+        }
+
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .modal h3 {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .modal p {
+            color: var(--muted);
+            font-size: 14px;
+            margin-bottom: 20px;
+        }
+
+        .modal input, .modal select {
+            width: 100%;
+            padding: 10px 14px;
+            border: 1.5px solid var(--border);
+            border-radius: 10px;
+            font-size: 14px;
+            font-family: inherit;
+            background: var(--bg);
+            color: var(--text);
+            outline: none;
+            transition: border-color var(--transition);
+            margin-bottom: 10px;
+        }
+
+        .modal input:focus, .modal select:focus {
+            border-color: var(--primary);
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 8px;
+        }
+
+        .modal-actions .btn {
+            padding: 10px 24px;
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all var(--transition);
+            font-family: inherit;
+            flex: 1;
+        }
+
+        .modal-actions .btn-primary {
+            background: var(--primary);
+            color: var(--bg);
+        }
+
+        .modal-actions .btn-primary:hover {
+            background: var(--primary-teal);
+        }
+
+        .modal-actions .btn-cancel {
+            background: transparent;
+            color: var(--muted);
+            border: 1px solid var(--border);
+        }
+
+        .modal-actions .btn-cancel:hover {
+            border-color: var(--danger);
+            color: var(--danger);
+        }
+
+        /* ============ TOAST ============ */
+        .toast {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            max-width: 400px;
+            padding: 14px 20px;
+            border-radius: var(--radius);
+            background: var(--card);
+            color: var(--text);
+            font-size: 14px;
+            font-weight: 500;
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow);
+            transform: translateY(100px);
+            opacity: 0;
+            transition: all 0.4s ease;
+            z-index: 999;
+        }
+
+        .toast.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        .toast.success {
+            border-color: var(--success);
+        }
+
+        .toast.error {
+            border-color: var(--danger);
+        }
+
+        /* ============ RESPONSIVE ============ */
+        @media (max-width: 900px) {
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 640px) {
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .header {
+                flex-wrap: wrap;
+                gap: 10px;
+            }
+
+            .header-actions {
+                flex-wrap: wrap;
+            }
+
+            .section {
+                padding: 16px;
+            }
+
+            .modal {
+                padding: 24px 16px;
+            }
+
+            .chat-session {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .chat-session .meta {
+                text-align: left;
+                width: 100%;
+            }
+
+            .reply-area {
+                flex-direction: column;
+            }
+
+            .reply-area button {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ============ HEADER ============ -->
+    <header class="header">
+        <div class="container" style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+            <a href="/" class="logo">
+                <span class="logo-icon">⚡</span>BLAZE<span>XMD</span>
+            </a>
+            <div class="header-actions" id="headerActions" style="display: none;">
+                <button class="status-toggle" id="statusToggle">
+                    <span class="status-dot online" id="statusDot"></span>
+                    <span id="statusLabel">Online</span>
+                </button>
+                <button class="btn-logout" id="logoutBtn">Logout</button>
+            </div>
+        </div>
+    </header>
+
+    <!-- ============ LOGIN ============ -->
+    <div class="login-container" id="loginContainer">
+        <div class="login-card">
+            <h2>🔐 Admin Access</h2>
+            <p>Enter your credentials to manage BLAZE-XMD.</p>
+            <div class="login-error" id="loginError">Invalid username or password</div>
+            <input type="text" id="loginUsername" placeholder="Username" />
+            <input type="password" id="loginPassword" placeholder="Password" />
+            <button class="btn" id="loginBtn">Sign In</button>
+        </div>
+    </div>
+
+    <!-- ============ DASHBOARD ============ -->
+    <div class="dashboard" id="dashboard">
+        <div class="container">
+
+            <!-- Stats -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="number" id="totalSessions">0</div>
+                    <div class="label">💬 Total Chats</div>
+                </div>
+                <div class="stat-card">
+                    <div class="number" id="unreadCount">0</div>
+                    <div class="label">📩 Unread</div>
+                </div>
+                <div class="stat-card">
+                    <div class="number" id="supportCount">0</div>
+                    <div class="label">📞 Support Numbers</div>
+                </div>
+                <div class="stat-card">
+                    <div class="number" id="adminNameDisplay">Support Team</div>
+                    <div class="label">👤 Admin Name</div>
+                </div>
+            </div>
+
+            <!-- Admin Profile -->
+            <div class="section">
+                <div class="section-header">
+                    <div class="section-title">👤 Admin Profile</div>
+                </div>
+                <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+                    <input type="text" id="adminNameInput" placeholder="Display name" style="flex:1; padding:10px 14px; border:1.5px solid var(--border); border-radius:10px; background:var(--bg); color:var(--text); font-family:inherit; outline:none; min-width:200px;" />
+                    <button class="btn-add" id="saveProfileBtn">Save Profile</button>
+                </div>
+                <div style="margin-top: 8px; font-size: 13px; color: var(--muted);">
+                    This name will show to users when you reply in chat.
+                </div>
+            </div>
+
+            <!-- Support Numbers -->
+            <div class="section">
+                <div class="section-header">
+                    <div class="section-title">📞 Support Numbers <small>(Admin managed)</small></div>
+                    <button class="btn-add" id="addSupportBtn">➕ Add Number</button>
+                </div>
+                <div class="table-wrap">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Flag</th>
+                                <th>Name</th>
+                                <th>Phone</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="supportTableBody">
+                            <!-- Dynamically loaded -->
+                        </tbody>
+                    </table>
+                </div>
+                <div id="emptySupportState" class="empty-state" style="display: none;">
+                    📭 No support numbers added yet. Click "Add Number" to get started.
+                </div>
+            </div>
+
+            <!-- Chat Sessions -->
+            <div class="section">
+                <div class="section-header">
+                    <div class="section-title">💬 Chat Sessions</div>
+                    <span style="font-size: 13px; color: var(--muted);" id="sessionCount">0 active</span>
+                </div>
+                <div id="chatSessionsList">
+                    <!-- Dynamically loaded -->
+                </div>
+                <div id="emptyChatState" class="empty-state">
+                    💬 No chat sessions yet.
+                </div>
+            </div>
+
+            <!-- Chat Preview -->
+            <div class="chat-preview" id="chatPreview">
+                <div id="previewMessages"></div>
+                <div class="reply-area" id="replyArea">
+                    <input type="text" id="replyInput" placeholder="Type your reply..." />
+                    <button id="replySendBtn">Send</button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- ============ MODAL ============ -->
+    <div class="modal-overlay" id="supportModal">
+        <div class="modal">
+            <h3 id="modalTitle">➕ Add Support Number</h3>
+            <p id="modalSub">Enter the details of the support contact.</p>
+            <input type="text" id="modalName" placeholder="Name (e.g. Support Team 1)" />
+            <input type="text" id="modalPhone" placeholder="Phone (e.g. 2349164624021)" />
+            <input type="text" id="modalCountryCode" placeholder="Country Code (e.g. +234)" />
+            <input type="text" id="modalCountryFlag" placeholder="Country Flag (e.g. 🇳🇬)" />
+            <input type="hidden" id="modalEditId" />
+            <div class="modal-actions">
+                <button class="btn btn-primary" id="modalSaveBtn">Save</button>
+                <button class="btn btn-cancel" id="modalCancelBtn">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============ TOAST ============ -->
+    <div class="toast" id="toast"></div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        // ============ STATE ============
+        let token = localStorage.getItem('adminToken');
+        let currentVisitorId = null;
+        let socket = null;
+
+        // ============ DOM REFS ============
+        const loginContainer = document.getElementById('loginContainer');
+        const dashboard = document.getElementById('dashboard');
+        const loginBtn = document.getElementById('loginBtn');
+        const loginUsername = document.getElementById('loginUsername');
+        const loginPassword = document.getElementById('loginPassword');
+        const loginError = document.getElementById('loginError');
+        const logoutBtn = document.getElementById('logoutBtn');
+        const headerActions = document.getElementById('headerActions');
+
+        const totalSessions = document.getElementById('totalSessions');
+        const unreadCount = document.getElementById('unreadCount');
+        const supportCount = document.getElementById('supportCount');
+        const adminNameDisplay = document.getElementById('adminNameDisplay');
+        const adminNameInput = document.getElementById('adminNameInput');
+        const saveProfileBtn = document.getElementById('saveProfileBtn');
+
+        const supportTableBody = document.getElementById('supportTableBody');
+        const emptySupportState = document.getElementById('emptySupportState');
+        const addSupportBtn = document.getElementById('addSupportBtn');
+
+        const chatSessionsList = document.getElementById('chatSessionsList');
+        const emptyChatState = document.getElementById('emptyChatState');
+        const sessionCount = document.getElementById('sessionCount');
+
+        const chatPreview = document.getElementById('chatPreview');
+        const previewMessages = document.getElementById('previewMessages');
+        const replyArea = document.getElementById('replyArea');
+        const replyInput = document.getElementById('replyInput');
+        const replySendBtn = document.getElementById('replySendBtn');
+
+        const statusToggle = document.getElementById('statusToggle');
+        const statusDot = document.getElementById('statusDot');
+        const statusLabel = document.getElementById('statusLabel');
+
+        const modal = document.getElementById('supportModal');
+        const modalTitle = document.getElementById('modalTitle');
+        const modalSub = document.getElementById('modalSub');
+        const modalName = document.getElementById('modalName');
+        const modalPhone = document.getElementById('modalPhone');
+        const modalCountryCode = document.getElementById('modalCountryCode');
+        const modalCountryFlag = document.getElementById('modalCountryFlag');
+        const modalEditId = document.getElementById('modalEditId');
+        const modalSaveBtn = document.getElementById('modalSaveBtn');
+        const modalCancelBtn = document.getElementById('modalCancelBtn');
+
+        const toast = document.getElementById('toast');
+
+        // ============ AUTH ============
+        function checkAuth() {
+            if (token) {
+                showDashboard();
+            } else {
+                showLogin();
+            }
+        }
+
+        function showLogin() {
+            loginContainer.style.display = 'flex';
+            dashboard.classList.remove('active');
+            headerActions.style.display = 'none';
+        }
+
+        function showDashboard() {
+            loginContainer.style.display = 'none';
+            dashboard.classList.add('active');
+            headerActions.style.display = 'flex';
+            loadData();
+            connectSocket();
+            loadUnreadCount();
+        }
+
+        // ============ LOGIN ============
+        loginBtn.addEventListener('click', async () => {
+            const username = loginUsername.value.trim();
+            const password = loginPassword.value.trim();
+
+            if (!username || !password) {
+                loginError.textContent = 'Please fill in all fields';
+                loginError.classList.add('show');
+                return;
+            }
+
+            try {
+                const res = await fetch('/api/admin/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
+                });
+
+                const data = await res.json();
+
+                if (data.token) {
+                    token = data.token;
+                    localStorage.setItem('adminToken', token);
+                    showDashboard();
+                    showToast('✅ Welcome back!', 'success');
+                    loginUsername.value = '';
+                    loginPassword.value = '';
+                    loginError.classList.remove('show');
+                } else {
+                    loginError.textContent = 'Invalid username or password';
+                    loginError.classList.add('show');
+                }
+            } catch (error) {
+                loginError.textContent = 'Network error. Please try again.';
+                loginError.classList.add('show');
+            }
+        });
+
+        loginUsername.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') loginBtn.click();
+        });
+        loginPassword.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') loginBtn.click();
+        });
+
+        // ============ LOGOUT ============
+        logoutBtn.addEventListener('click', () => {
+            token = null;
+            localStorage.removeItem('adminToken');
+            if (socket) socket.disconnect();
+            showLogin();
+            showToast('Logged out', 'success');
+        });
+
+        // ============ SOCKET ============
+        function connectSocket() {
+            if (socket) socket.disconnect();
+            socket = io();
+
+            socket.on('connect', () => {
+                console.log('✅ Admin socket connected');
+                socket.emit('admin-join');
+            });
+
+            socket.on('new-message', (data) => {
+                // Reload sessions and unread count
+                loadSessions();
+                loadUnreadCount();
+                // If this is the currently viewed session, reload messages
+                if (currentVisitorId === data.visitorId) {
+                    loadSessionMessages(currentVisitorId);
+                }
+            });
+
+            socket.on('unread-update', (data) => {
+                unreadCount.textContent = data.unread || 0;
+            });
+
+            socket.on('disconnect', () => {
+                console.log('⚠️ Admin socket disconnected');
+            });
+        }
+
+        // ============ LOAD DATA ============
+        async function loadData() {
+            await Promise.all([
+                loadSettings(),
+                loadSupportNumbers(),
+                loadSessions(),
+                loadUnreadCount()
+            ]);
+        }
+
+        // ============ LOAD SETTINGS ============
+        async function loadSettings() {
+            try {
+                const res = await fetch('/api/settings');
+                const data = await res.json();
+                if (data) {
+                    adminNameInput.value = data.adminName || 'Support Team';
+                    adminNameDisplay.textContent = data.adminName || 'Support Team';
+                    updateStatusUI(data.isOnline !== undefined ? data.isOnline : true);
+                }
+            } catch (error) {
+                console.error('Error loading settings:', error);
+            }
+        }
+
+        function updateStatusUI(online) {
+            if (online) {
+                statusDot.className = 'status-dot online';
+                statusLabel.textContent = 'Online';
+                statusToggle.style.borderColor = 'var(--success)';
+            } else {
+                statusDot.className = 'status-dot offline';
+                statusLabel.textContent = 'Offline';
+                statusToggle.style.borderColor = 'var(--danger)';
+            }
+        }
+
+        // ============ STATUS TOGGLE ============
+        statusToggle.addEventListener('click', async () => {
+            try {
+                const currentStatus = statusLabel.textContent === 'Online';
+                const res = await fetch('/api/admin/settings', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({
+                        isOnline: !currentStatus,
+                        adminName: adminNameInput.value || 'Support Team'
+                    })
+                });
+                const data = await res.json();
+                if (data) {
+                    updateStatusUI(data.isOnline !== undefined ? data.isOnline : true);
+                    showToast(`Status updated: ${data.isOnline ? '🟢 Online' : '🔴 Offline'}`, 'success');
+                }
+            } catch (error) {
+                showToast('Error updating status', 'error');
+            }
+        });
+
+        // ============ SAVE PROFILE ============
+        saveProfileBtn.addEventListener('click', async () => {
+            const name = adminNameInput.value.trim() || 'Support Team';
+            try {
+                const res = await fetch('/api/admin/settings', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({
+                        adminName: name,
+                        isOnline: statusLabel.textContent === 'Online'
+                    })
+                });
+                const data = await res.json();
+                if (data) {
+                    adminNameDisplay.textContent = data.adminName || 'Support Team';
+                    showToast('✅ Profile updated!', 'success');
+                }
+            } catch (error) {
+                showToast('Error updating profile', 'error');
+            }
+        });
+
+        // ============ LOAD SUPPORT NUMBERS ============
+        async function loadSupportNumbers() {
+            try {
+                const res = await fetch('/api/support');
+                const data = await res.json();
+                if (data && data.length > 0) {
+                    supportTableBody.innerHTML = data.map(s => `
+                        <tr>
+                            <td class="flag">${s.countryFlag || '🏳️'}</td>
+                            <td><strong>${s.name}</strong></td>
+                            <td>${s.countryCode || ''} ${s.phone}</td>
+                            <td>
+                                <div class="actions">
+                                    <button class="btn-edit" onclick="editSupport('${s._id}')">Edit</button>
+                                    <button class="btn-danger" onclick="deleteSupport('${s._id}')">Delete</button>
+                                </div>
+                            </td>
+                        </tr>
+                    `).join('');
+                    supportCount.textContent = data.length;
+                    emptySupportState.style.display = 'none';
+                } else {
+                    supportTableBody.innerHTML = '';
+                    supportCount.textContent = '0';
+                    emptySupportState.style.display = 'block';
+                }
+            } catch (error) {
+                console.error('Error loading support numbers:', error);
+            }
+        }
+
+        // ============ SUPPORT CRUD ============
+        addSupportBtn.addEventListener('click', () => {
+            modalTitle.textContent = '➕ Add Support Number';
+            modalSub.textContent = 'Enter the details of the support contact.';
+            modalName.value = '';
+            modalPhone.value = '';
+            modalCountryCode.value = '';
+            modalCountryFlag.value = '';
+            modalEditId.value = '';
+            modal.classList.add('active');
+        });
+
+        modalCancelBtn.addEventListener('click', () => {
+            modal.classList.remove('active');
+        });
+
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) modal.classList.remove('active');
+        });
+
+        modalSaveBtn.addEventListener('click', async () => {
+            const name = modalName.value.trim();
+            const phone = modalPhone.value.trim();
+            const countryCode = modalCountryCode.value.trim();
+            const countryFlag = modalCountryFlag.value.trim();
+            const editId = modalEditId.value;
+
+            if (!name || !phone) {
+                showToast('Name and phone are required', 'error');
+                return;
+            }
+
+            try {
+                let res;
+                const data = { name, phone, countryCode, countryFlag };
+
+                if (editId) {
+                    res = await fetch(`/api/admin/support/${editId}`, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${token}`
+                        },
+                        body: JSON.stringify(data)
+                    });
+                } else {
+                    res = await fetch('/api/admin/support', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${token}`
+                        },
+                        body: JSON.stringify(data)
+                    });
+                }
+
+                const result = await res.json();
+                if (result._id || result.success) {
+                    showToast(editId ? '✅ Support number updated!' : '✅ Support number added!', 'success');
+                    modal.classList.remove('active');
+                    loadSupportNumbers();
+                } else {
+                    showToast(result.error || 'Failed to save', 'error');
+                }
+            } catch (error) {
+                showToast('Error saving support number', 'error');
+            }
+        });
+
+        window.editSupport = async (id) => {
+            try {
+                const res = await fetch('/api/support');
+                const data = await res.json();
+                const support = data.find(s => s._id === id);
+                if (support) {
+                    modalTitle.textContent = '✏️ Edit Support Number';
+                    modalSub.textContent = 'Update the support contact details.';
+                    modalName.value = support.name;
+                    modalPhone.value = support.phone;
+                    modalCountryCode.value = support.countryCode || '';
+                    modalCountryFlag.value = support.countryFlag || '';
+                    modalEditId.value = id;
+                    modal.classList.add('active');
+                }
+            } catch (error) {
+                showToast('Error loading support data', 'error');
+            }
+        };
+
+        window.deleteSupport = async (id) => {
+            if (!confirm('Delete this support number?')) return;
+            try {
+                const res = await fetch(`/api/admin/support/${id}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const data = await res.json();
+                if (data.success) {
+                    showToast('🗑️ Support number deleted', 'success');
+                    loadSupportNumbers();
+                } else {
+                    showToast('Failed to delete', 'error');
+                }
+            } catch (error) {
+                showToast('Error deleting support number', 'error');
+            }
+        };
+
+        // ============ LOAD SESSIONS ============
+        async function loadSessions() {
+            try {
+                const res = await fetch('/api/admin/sessions', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const data = await res.json();
+                if (data.sessions && data.sessions.length > 0) {
+                    chatSessionsList.innerHTML = data.sessions.map(s => `
+                        <div class="chat-session ${currentVisitorId === s.visitorId ? 'active' : ''}" onclick="viewSession('${s.visitorId}')">
+                            <div class="info">
+                                <div class="name">${s.name || 'Guest'} ${s.unreadCount > 0 ? `<span class="badge-unread">${s.unreadCount}</span>` : ''}</div>
+                                <div class="preview">${s.unreadCount > 0 ? '📩 New messages' : 'Click to view chat'}</div>
+                            </div>
+                            <div class="meta">
+                                <div>${new Date(s.lastMessageAt).toLocaleDateString()}</div>
+                                <div style="font-size: 11px;">${new Date(s.lastMessageAt).toLocaleTimeString()}</div>
+                            </div>
+                        </div>
+                    `).join('');
+                    emptyChatState.style.display = 'none';
+                    sessionCount.textContent = `${data.sessions.length} active`;
+                    totalSessions.textContent = data.sessions.length;
+                } else {
+                    chatSessionsList.innerHTML = '';
+                    emptyChatState.style.display = 'block';
+                    sessionCount.textContent = '0 active';
+                    totalSessions.textContent = '0';
+                }
+            } catch (error) {
+                console.error('Error loading sessions:', error);
+            }
+        }
+
+        // ============ VIEW SESSION ============
+        window.viewSession = async (visitorId) => {
+            currentVisitorId = visitorId;
+            chatPreview.classList.add('active');
+            replyArea.classList.add('active');
+            await loadSessionMessages(visitorId);
+            // Highlight active session
+            document.querySelectorAll('.chat-session').forEach(el => {
+                el.classList.toggle('active', el.onclick && el.onclick.toString().includes(visitorId));
+            });
+        };
+
+        // ============ LOAD SESSION MESSAGES ============
+        async function loadSessionMessages(visitorId) {
+            try {
+                const res = await fetch(`/api/admin/session/${visitorId}/messages`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const data = await res.json();
+                if (data.messages) {
+                    previewMessages.innerHTML = data.messages.map(m => `
+                        <div class="msg ${m.isFromAdmin ? 'admin' : 'user'}">
+                            ${m.isFromAdmin ? `<span class="admin-name">${m.adminName || 'Support Team'}</span>` : ''}
+                            ${m.message}
+                            <span class="time">${new Date(m.timestamp).toLocaleTimeString()}</span>
+                        </div>
+                    `).join('');
+                    previewMessages.scrollTop = previewMessages.scrollHeight;
+                    // Load unread count
+                    loadUnreadCount();
+                }
+            } catch (error) {
+                console.error('Error loading messages:', error);
+            }
+        }
+
+        // ============ REPLY TO MESSAGE ============
+        replySendBtn.addEventListener('click', async () => {
+            if (!currentVisitorId) return;
+            const message = replyInput.value.trim();
+            if (!message) return;
+
+            replySendBtn.disabled = true;
+            replySendBtn.textContent = 'Sending...';
+
+            // Add admin message to UI
+            const adminName = adminNameInput.value || 'Support Team';
+            const msgDiv = document.createElement('div');
+            msgDiv.className = 'msg admin';
+            msgDiv.innerHTML = `
+                <span class="admin-name">${adminName}</span>
+                ${message}
+                <span class="time">${new Date().toLocaleTimeString()}</span>
+            `;
+            previewMessages.appendChild(msgDiv);
+            previewMessages.scrollTop = previewMessages.scrollHeight;
+
+            // Send via socket
+            socket.emit('admin-message', {
+                visitorId: currentVisitorId,
+                message
+            });
+
+            replyInput.value = '';
+            replySendBtn.disabled = false;
+            replySendBtn.textContent = 'Send';
+        });
+
+        replyInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') replySendBtn.click();
+        });
+
+        // ============ LOAD UNREAD COUNT ============
+        async function loadUnreadCount() {
+            try {
+                const res = await fetch('/api/admin/unread-count', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const data = await res.json();
+                unreadCount.textContent = data.unread || 0;
+            } catch (error) {
+                console.error('Error loading unread count:', error);
+            }
+        }
+
+        // ============ TOAST ============
+        function showToast(message, type = 'success') {
+            toast.textContent = message;
+            toast.className = 'toast ' + type + ' show';
+            clearTimeout(toast._timeout);
+            toast._timeout = setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3500);
+        }
+
+        // ============ INIT ============
+        checkAuth();
+    </script>
+</body>
+</html>
