@@ -6,11 +6,7 @@
     <title>Admin · BLAZE-XMD</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
 
         :root {
             --primary: #25D366;
@@ -30,20 +26,8 @@
             --warning: #F59E0B;
         }
 
-        body {
-            font-family: 'Inter', -apple-system, sans-serif;
-            background: var(--bg);
-            color: var(--text);
-            line-height: 1.6;
-            min-height: 100vh;
-        }
-
-        .container {
-            max-width: 1120px;
-            margin: 0 auto;
-            padding: 0 24px;
-            width: 100%;
-        }
+        body { font-family: 'Inter', -apple-system, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; min-height: 100vh; }
+        .container { max-width: 1120px; margin: 0 auto; padding: 0 24px; width: 100%; }
 
         /* Header */
         .header {
@@ -58,13 +42,7 @@
             top: 0;
             z-index: 100;
         }
-
-        .logo {
-            font-size: 20px;
-            font-weight: 800;
-            color: var(--text);
-            text-decoration: none;
-        }
+        .logo { font-size: 20px; font-weight: 800; color: var(--text); text-decoration: none; }
         .logo span { color: var(--primary); }
         .logo-icon {
             display: inline-block;
@@ -79,14 +57,7 @@
             color: var(--bg);
             margin-right: 8px;
         }
-
-        .header-actions {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            flex-wrap: wrap;
-        }
-
+        .header-actions { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
         .status-toggle {
             display: flex;
             align-items: center;
@@ -103,15 +74,9 @@
             color: var(--text);
         }
         .status-toggle:hover { border-color: var(--primary); }
-        .status-dot {
-            width: 10px;
-            height: 10px;
-            border-radius: 50%;
-            display: inline-block;
-        }
+        .status-dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
         .status-dot.online { background: var(--success); }
         .status-dot.offline { background: var(--danger); }
-
         .btn-logout {
             padding: 8px 18px;
             background: transparent;
@@ -127,12 +92,7 @@
         .btn-logout:hover { border-color: var(--danger); color: var(--danger); }
 
         /* Login */
-        .login-container {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            min-height: 80vh;
-        }
+        .login-container { display: flex; align-items: center; justify-content: center; min-height: 80vh; }
         .login-card {
             background: var(--card);
             padding: 40px 36px;
@@ -141,16 +101,8 @@
             max-width: 400px;
             width: 100%;
         }
-        .login-card h2 {
-            font-size: 24px;
-            font-weight: 800;
-            margin-bottom: 8px;
-        }
-        .login-card p {
-            color: var(--muted);
-            font-size: 14px;
-            margin-bottom: 24px;
-        }
+        .login-card h2 { font-size: 24px; font-weight: 800; margin-bottom: 8px; }
+        .login-card p { color: var(--muted); font-size: 14px; margin-bottom: 24px; }
         .login-card input {
             width: 100%;
             padding: 12px 16px;
@@ -178,23 +130,12 @@
             transition: all var(--transition);
             font-family: inherit;
         }
-        .login-card .btn:hover {
-            background: var(--primary-teal);
-            transform: translateY(-2px);
-        }
-        .login-error {
-            color: var(--danger);
-            font-size: 13px;
-            margin-bottom: 12px;
-            display: none;
-        }
+        .login-card .btn:hover { background: var(--primary-teal); transform: translateY(-2px); }
+        .login-error { color: var(--danger); font-size: 13px; margin-bottom: 12px; display: none; }
         .login-error.show { display: block; }
 
         /* Dashboard */
-        .dashboard {
-            display: none;
-            padding: 24px 0 40px;
-        }
+        .dashboard { display: none; padding: 24px 0 40px; }
         .dashboard.active { display: block; }
 
         /* Stats */
@@ -210,16 +151,8 @@
             border-radius: var(--radius);
             border: 1px solid var(--border);
         }
-        .stat-card .number {
-            font-size: 28px;
-            font-weight: 800;
-            color: var(--primary);
-        }
-        .stat-card .label {
-            font-size: 12px;
-            color: var(--muted);
-            font-weight: 500;
-        }
+        .stat-card .number { font-size: 28px; font-weight: 800; color: var(--primary); }
+        .stat-card .label { font-size: 12px; color: var(--muted); font-weight: 500; }
 
         /* Sections */
         .section {
@@ -237,15 +170,8 @@
             flex-wrap: wrap;
             gap: 12px;
         }
-        .section-title {
-            font-size: 18px;
-            font-weight: 700;
-        }
-        .section-title small {
-            font-weight: 400;
-            color: var(--muted);
-            font-size: 13px;
-        }
+        .section-title { font-size: 18px; font-weight: 700; }
+        .section-title small { font-weight: 400; color: var(--muted); font-size: 13px; }
 
         /* Buttons */
         .btn-add {
@@ -260,11 +186,7 @@
             transition: all var(--transition);
             font-family: inherit;
         }
-        .btn-add:hover {
-            transform: scale(1.02);
-            box-shadow: 0 4px 16px rgba(37, 211, 102, 0.3);
-        }
-
+        .btn-add:hover { transform: scale(1.02); box-shadow: 0 4px 16px rgba(37, 211, 102, 0.3); }
         .btn-danger {
             padding: 6px 14px;
             background: var(--danger);
@@ -278,7 +200,6 @@
             font-family: inherit;
         }
         .btn-danger:hover { opacity: 0.8; }
-
         .btn-edit {
             padding: 6px 14px;
             background: var(--primary-teal);
@@ -292,26 +213,7 @@
             font-family: inherit;
         }
         .btn-edit:hover { opacity: 0.8; }
-
-        .btn-warning {
-            padding: 6px 14px;
-            background: var(--warning);
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-weight: 600;
-            font-size: 12px;
-            cursor: pointer;
-            transition: all var(--transition);
-            font-family: inherit;
-        }
-        .btn-warning:hover { opacity: 0.8; }
-
-        .btn-sm {
-            padding: 4px 10px;
-            font-size: 11px;
-            border-radius: 6px;
-        }
+        .btn-sm { padding: 4px 10px; font-size: 11px; border-radius: 6px; }
 
         /* Tables */
         .table-wrap { overflow-x: auto; }
@@ -330,18 +232,11 @@
             letter-spacing: 0.4px;
             border-bottom: 1px solid var(--border);
         }
-        .table td {
-            padding: 10px 12px;
-            border-bottom: 1px solid var(--border);
-            vertical-align: middle;
-        }
+        .table td { padding: 10px 12px; border-bottom: 1px solid var(--border); vertical-align: middle; }
         .table .flag { font-size: 20px; }
         .table .actions { display: flex; gap: 6px; flex-wrap: wrap; }
-        .empty-state {
-            text-align: center;
-            padding: 32px 20px;
-            color: var(--muted);
-        }
+        .table .email-cell { color: var(--primary); font-weight: 500; }
+        .empty-state { text-align: center; padding: 32px 20px; color: var(--muted); }
 
         /* Chat Sessions */
         .chat-session {
@@ -357,27 +252,12 @@
             flex-wrap: wrap;
             gap: 8px;
         }
-        .chat-session:hover {
-            border-color: var(--primary);
-            background: rgba(37, 211, 102, 0.03);
-        }
-        .chat-session.active {
-            border-color: var(--primary);
-            background: rgba(37, 211, 102, 0.05);
-        }
-        .chat-session .info .name {
-            font-weight: 600;
-            font-size: 14px;
-        }
-        .chat-session .info .preview {
-            font-size: 13px;
-            color: var(--muted);
-        }
-        .chat-session .meta {
-            font-size: 12px;
-            color: var(--muted);
-            text-align: right;
-        }
+        .chat-session:hover { border-color: var(--primary); background: rgba(37, 211, 102, 0.03); }
+        .chat-session.active { border-color: var(--primary); background: rgba(37, 211, 102, 0.05); }
+        .chat-session .info .name { font-weight: 600; font-size: 14px; }
+        .chat-session .info .email { font-size: 12px; color: var(--primary); }
+        .chat-session .info .preview { font-size: 13px; color: var(--muted); }
+        .chat-session .meta { font-size: 12px; color: var(--muted); text-align: right; }
         .chat-session .badge-unread {
             background: var(--danger);
             color: white;
@@ -385,10 +265,6 @@
             border-radius: 100px;
             font-size: 11px;
             font-weight: 700;
-        }
-        .chat-session .session-actions {
-            display: flex;
-            gap: 6px;
         }
 
         /* Chat Preview */
@@ -408,32 +284,14 @@
             margin-bottom: 6px;
             border-radius: 8px;
             font-size: 13px;
-            position: relative;
             display: flex;
             justify-content: space-between;
             align-items: center;
         }
-        .chat-preview .msg.user {
-            background: var(--primary);
-            color: var(--bg);
-            text-align: right;
-        }
-        .chat-preview .msg.admin {
-            background: var(--card-hover);
-            border: 1px solid var(--border);
-        }
-        .chat-preview .msg .time {
-            font-size: 10px;
-            opacity: 0.6;
-            display: block;
-            margin-top: 2px;
-        }
-        .chat-preview .msg .admin-name {
-            font-size: 11px;
-            font-weight: 600;
-            color: var(--primary);
-            display: block;
-        }
+        .chat-preview .msg.user { background: var(--primary); color: var(--bg); text-align: right; }
+        .chat-preview .msg.admin { background: var(--card-hover); border: 1px solid var(--border); }
+        .chat-preview .msg .time { font-size: 10px; opacity: 0.6; display: block; margin-top: 2px; }
+        .chat-preview .msg .admin-name { font-size: 11px; font-weight: 600; color: var(--primary); display: block; }
         .chat-preview .msg .delete-msg {
             background: none;
             border: none;
@@ -445,10 +303,7 @@
             transition: all var(--transition);
             opacity: 0.5;
         }
-        .chat-preview .msg .delete-msg:hover {
-            opacity: 1;
-            background: rgba(220, 38, 38, 0.15);
-        }
+        .chat-preview .msg .delete-msg:hover { opacity: 1; background: rgba(220, 38, 38, 0.15); }
 
         /* Reply Area */
         .reply-area {
@@ -509,16 +364,8 @@
             from { opacity: 0; transform: translateY(20px); }
             to { opacity: 1; transform: translateY(0); }
         }
-        .modal h3 {
-            font-size: 20px;
-            font-weight: 700;
-            margin-bottom: 8px;
-        }
-        .modal p {
-            color: var(--muted);
-            font-size: 14px;
-            margin-bottom: 20px;
-        }
+        .modal h3 { font-size: 20px; font-weight: 700; margin-bottom: 8px; }
+        .modal p { color: var(--muted); font-size: 14px; margin-bottom: 20px; }
         .modal input {
             width: 100%;
             padding: 10px 14px;
@@ -533,11 +380,7 @@
             margin-bottom: 10px;
         }
         .modal input:focus { border-color: var(--primary); }
-        .modal-actions {
-            display: flex;
-            gap: 10px;
-            margin-top: 8px;
-        }
+        .modal-actions { display: flex; gap: 10px; margin-top: 8px; }
         .modal-actions .btn {
             padding: 10px 24px;
             border: none;
@@ -548,20 +391,14 @@
             font-family: inherit;
             flex: 1;
         }
-        .modal-actions .btn-primary {
-            background: var(--primary);
-            color: var(--bg);
-        }
+        .modal-actions .btn-primary { background: var(--primary); color: var(--bg); }
         .modal-actions .btn-primary:hover { background: var(--primary-teal); }
         .modal-actions .btn-cancel {
             background: transparent;
             color: var(--muted);
             border: 1px solid var(--border);
         }
-        .modal-actions .btn-cancel:hover {
-            border-color: var(--danger);
-            color: var(--danger);
-        }
+        .modal-actions .btn-cancel:hover { border-color: var(--danger); color: var(--danger); }
 
         /* Toast */
         .toast {
@@ -582,18 +419,13 @@
             transition: all 0.4s ease;
             z-index: 999;
         }
-        .toast.show {
-            transform: translateY(0);
-            opacity: 1;
-        }
+        .toast.show { transform: translateY(0); opacity: 1; }
         .toast.success { border-color: var(--success); }
         .toast.error { border-color: var(--danger); }
         .toast.warning { border-color: var(--warning); }
 
         /* Responsive */
-        @media (max-width: 900px) {
-            .stats-grid { grid-template-columns: repeat(2, 1fr); }
-        }
+        @media (max-width: 900px) { .stats-grid { grid-template-columns: repeat(2, 1fr); } }
         @media (max-width: 640px) {
             .stats-grid { grid-template-columns: 1fr; }
             .header { flex-wrap: wrap; gap: 10px; }
@@ -692,8 +524,7 @@
                                 <th>Actions</th>
                             </tr>
                         </thead>
-                        <tbody id="supportTableBody">
-                        </tbody>
+                        <tbody id="supportTableBody"></tbody>
                     </table>
                 </div>
                 <div id="emptySupportState" class="empty-state" style="display: none;">
@@ -1144,12 +975,14 @@
                     chatSessionsList.innerHTML = data.sessions.map(s => `
                         <div class="chat-session ${currentVisitorId === s.visitorId ? 'active' : ''}" onclick="viewSession('${s.visitorId}')">
                             <div class="info">
-                                <div class="name">${s.name || 'Guest'} ${s.unreadCount > 0 ? `<span class="badge-unread">${s.unreadCount}</span>` : ''}</div>
-                                <div class="preview">${s.totalMessages || 0} messages · ${s.unreadCount > 0 ? '📩 New' : 'Click to view'}</div>
+                                <div class="name">${s.name || 'Guest'}</div>
+                                <div class="email">${s.email || 'No email'}</div>
+                                <div class="preview">${s.totalMessages || 0} messages · ${s.unreadCount > 0 ? `📩 ${s.unreadCount} unread` : 'No new messages'}</div>
                             </div>
                             <div class="meta">
                                 <div>${new Date(s.lastMessageAt).toLocaleDateString()}</div>
                                 <div style="font-size: 11px;">${new Date(s.lastMessageAt).toLocaleTimeString()}</div>
+                                ${s.unreadCount > 0 ? `<span class="badge-unread">${s.unreadCount}</span>` : ''}
                             </div>
                         </div>
                     `).join('');
@@ -1173,7 +1006,20 @@
             chatPreview.classList.add('active');
             replyArea.classList.add('active');
             clearSessionBtn.style.display = 'inline-block';
-            chatPreviewTitle.textContent = `💬 Chat with ${visitorId.substring(0, 12)}...`;
+            
+            // Get session info to show email
+            try {
+                const res = await fetch(`/api/chat/messages/${visitorId}`);
+                const data = await res.json();
+                if (data.session) {
+                    chatPreviewTitle.textContent = `💬 ${data.session.email || visitorId}`;
+                } else {
+                    chatPreviewTitle.textContent = `💬 ${visitorId}`;
+                }
+            } catch (e) {
+                chatPreviewTitle.textContent = `💬 ${visitorId}`;
+            }
+            
             await loadSessionMessages(visitorId);
             document.querySelectorAll('.chat-session').forEach(el => {
                 el.classList.toggle('active', el.onclick && el.onclick.toString().includes(visitorId));
