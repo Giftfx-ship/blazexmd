@@ -64,11 +64,7 @@
             color: var(--text);
             text-decoration: none;
         }
-
-        .logo span {
-            color: var(--primary);
-        }
-
+        .logo span { color: var(--primary); }
         .logo-icon {
             display: inline-block;
             width: 32px;
@@ -82,7 +78,6 @@
             color: var(--bg);
             margin-right: 8px;
         }
-
         .btn-back {
             padding: 8px 20px;
             background: transparent;
@@ -96,20 +91,101 @@
             text-decoration: none;
             font-family: inherit;
         }
-
         .btn-back:hover {
             border-color: var(--primary);
             color: var(--text);
         }
 
-        /* ============ CHAT CONTAINER ============ */
-        .chat-container {
+        /* ============ EMAIL LOGIN ============ */
+        .email-container {
             flex: 1;
             display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 20px;
+        }
+
+        .email-card {
+            background: var(--card);
+            padding: 40px 36px;
+            border-radius: var(--radius);
+            border: 1px solid var(--border);
+            max-width: 420px;
+            width: 100%;
+            text-align: center;
+        }
+
+        .email-card .icon {
+            font-size: 48px;
+            margin-bottom: 12px;
+        }
+
+        .email-card h2 {
+            font-size: 24px;
+            font-weight: 800;
+            margin-bottom: 8px;
+        }
+
+        .email-card p {
+            color: var(--muted);
+            font-size: 14px;
+            margin-bottom: 24px;
+        }
+
+        .email-card input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1.5px solid var(--border);
+            border-radius: 10px;
+            font-size: 14px;
+            font-family: inherit;
+            background: var(--bg);
+            color: var(--text);
+            outline: none;
+            transition: border-color var(--transition);
+            margin-bottom: 12px;
+        }
+
+        .email-card input:focus {
+            border-color: var(--primary);
+        }
+
+        .email-card .btn {
+            width: 100%;
+            padding: 12px;
+            background: var(--primary);
+            color: var(--bg);
+            border: none;
+            border-radius: 10px;
+            font-weight: 700;
+            font-size: 15px;
+            cursor: pointer;
+            transition: all var(--transition);
+            font-family: inherit;
+        }
+
+        .email-card .btn:hover {
+            background: var(--primary-teal);
+            transform: translateY(-2px);
+        }
+
+        .email-error {
+            color: #DC2626;
+            font-size: 13px;
+            margin-bottom: 12px;
+            display: none;
+        }
+        .email-error.show { display: block; }
+
+        /* ============ CHAT CONTAINER ============ */
+        .chat-container {
+            display: none;
+            flex: 1;
             flex-direction: column;
             padding: 24px 0 32px;
             max-height: calc(100vh - 100px);
         }
+        .chat-container.active { display: flex; }
 
         .chat-status {
             display: flex;
@@ -129,24 +205,11 @@
             background: var(--primary);
             flex-shrink: 0;
         }
+        .status-dot.offline { background: #DC2626; }
 
-        .status-dot.offline {
-            background: #DC2626;
-        }
-
-        .status-info {
-            flex: 1;
-        }
-
-        .status-info .title {
-            font-weight: 600;
-            font-size: 15px;
-        }
-
-        .status-info .sub {
-            font-size: 13px;
-            color: var(--muted);
-        }
+        .status-info { flex: 1; }
+        .status-info .title { font-weight: 600; font-size: 15px; }
+        .status-info .sub { font-size: 13px; color: var(--muted); }
 
         .status-badge {
             padding: 4px 14px;
@@ -156,7 +219,6 @@
             background: rgba(37, 211, 102, 0.15);
             color: var(--primary);
         }
-
         .status-badge.offline {
             background: rgba(220, 38, 38, 0.15);
             color: #DC2626;
@@ -174,14 +236,8 @@
             max-height: 500px;
         }
 
-        .messages::-webkit-scrollbar {
-            width: 4px;
-        }
-
-        .messages::-webkit-scrollbar-thumb {
-            background: var(--border);
-            border-radius: 4px;
-        }
+        .messages::-webkit-scrollbar { width: 4px; }
+        .messages::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
 
         .chat-message {
             margin-bottom: 12px;
@@ -205,25 +261,19 @@
             margin-left: auto;
             border-bottom-right-radius: 4px;
         }
-
         .chat-message.admin {
             background: var(--card-hover);
             color: var(--text);
             border: 1px solid var(--border);
             border-bottom-left-radius: 4px;
         }
-
         .chat-message .msg-time {
             font-size: 10px;
             opacity: 0.6;
             margin-top: 4px;
             display: block;
         }
-
-        .chat-message.user .msg-time {
-            color: rgba(0,0,0,0.5);
-        }
-
+        .chat-message.user .msg-time { color: rgba(0,0,0,0.5); }
         .chat-message .admin-name {
             font-size: 11px;
             font-weight: 600;
@@ -231,7 +281,6 @@
             margin-bottom: 2px;
             display: block;
         }
-
         .chat-message.system {
             background: rgba(255,255,255,0.03);
             color: var(--muted);
@@ -246,11 +295,7 @@
             color: var(--muted);
             padding: 40px 20px;
         }
-
-        .empty-messages .icon {
-            font-size: 48px;
-            margin-bottom: 12px;
-        }
+        .empty-messages .icon { font-size: 48px; margin-bottom: 12px; }
 
         /* ============ INPUT ============ */
         .input-area {
@@ -275,15 +320,8 @@
             outline: none;
             transition: border-color var(--transition);
         }
-
-        .input-area input:focus {
-            border-color: var(--primary);
-        }
-
-        .input-area input::placeholder {
-            color: var(--muted);
-        }
-
+        .input-area input:focus { border-color: var(--primary); }
+        .input-area input::placeholder { color: var(--muted); }
         .input-area input:disabled {
             opacity: 0.5;
             cursor: not-allowed;
@@ -302,12 +340,7 @@
             font-family: inherit;
             white-space: nowrap;
         }
-
-        .input-area button:hover {
-            background: var(--primary-teal);
-            transform: scale(1.02);
-        }
-
+        .input-area button:hover { background: var(--primary-teal); transform: scale(1.02); }
         .input-area button:disabled {
             opacity: 0.5;
             cursor: not-allowed;
@@ -322,7 +355,6 @@
             border-radius: var(--radius);
             border: 1px solid var(--border);
         }
-
         .support-numbers-section h4 {
             font-size: 14px;
             font-weight: 600;
@@ -348,34 +380,15 @@
             text-decoration: none;
             color: var(--text);
         }
-
         .support-number-item:hover {
             border-color: var(--primary);
             background: rgba(37, 211, 102, 0.05);
         }
-
-        .support-number-item .flag {
-            font-size: 24px;
-        }
-
-        .support-number-item .info {
-            flex: 1;
-        }
-
-        .support-number-item .info .name {
-            font-size: 13px;
-            font-weight: 600;
-        }
-
-        .support-number-item .info .phone {
-            font-size: 12px;
-            color: var(--muted);
-        }
-
-        .support-number-item .whatsapp-icon {
-            color: var(--primary);
-            font-size: 20px;
-        }
+        .support-number-item .flag { font-size: 24px; }
+        .support-number-item .info { flex: 1; }
+        .support-number-item .info .name { font-size: 13px; font-weight: 600; }
+        .support-number-item .info .phone { font-size: 12px; color: var(--muted); }
+        .support-number-item .whatsapp-icon { color: var(--primary); font-size: 20px; }
 
         .empty-support {
             padding: 16px;
@@ -405,101 +418,36 @@
             max-width: 90%;
             text-align: center;
         }
-
         .toast.show {
             opacity: 1;
             transform: translateX(-50%) translateY(0);
         }
-
-        .toast.error {
-            border-color: #DC2626;
-        }
-
-        .toast.success {
-            border-color: var(--primary);
-        }
+        .toast.error { border-color: #DC2626; }
+        .toast.success { border-color: var(--primary); }
 
         /* ============ RESPONSIVE ============ */
         @media (max-width: 640px) {
-            .header {
-                padding: 14px 0;
-            }
-
-            .logo {
-                font-size: 17px;
-            }
-
-            .logo-icon {
-                width: 28px;
-                height: 28px;
-                line-height: 28px;
-                font-size: 13px;
-            }
-
-            .chat-status {
-                flex-wrap: wrap;
-            }
-
-            .status-badge {
-                margin-left: auto;
-            }
-
-            .messages {
-                min-height: 200px;
-                max-height: 350px;
-                padding: 12px 14px;
-            }
-
-            .input-area {
-                flex-direction: column;
-                padding: 12px 16px;
-            }
-
-            .input-area button {
-                width: 100%;
-            }
-
-            .chat-message {
-                max-width: 95%;
-                font-size: 13px;
-                padding: 8px 12px;
-            }
-
-            .support-numbers-section {
-                padding: 12px 16px;
-            }
-
-            .btn-back {
-                font-size: 12px;
-                padding: 6px 14px;
-            }
+            .header { padding: 14px 0; }
+            .logo { font-size: 17px; }
+            .logo-icon { width: 28px; height: 28px; line-height: 28px; font-size: 13px; }
+            .chat-status { flex-wrap: wrap; }
+            .status-badge { margin-left: auto; }
+            .messages { min-height: 200px; max-height: 350px; padding: 12px 14px; }
+            .input-area { flex-direction: column; padding: 12px 16px; }
+            .input-area button { width: 100%; }
+            .chat-message { max-width: 95%; font-size: 13px; padding: 8px 12px; }
+            .support-numbers-section { padding: 12px 16px; }
+            .btn-back { font-size: 12px; padding: 6px 14px; }
+            .email-card { padding: 28px 20px; }
         }
 
         @media (max-width: 380px) {
-            .container {
-                padding: 0 12px;
-            }
-
-            .messages {
-                max-height: 250px;
-                min-height: 150px;
-            }
-
-            .status-info .title {
-                font-size: 13px;
-            }
-
-            .status-info .sub {
-                font-size: 11px;
-            }
-
-            .support-number-item {
-                padding: 8px 10px;
-            }
-
-            .support-number-item .flag {
-                font-size: 18px;
-            }
+            .container { padding: 0 12px; }
+            .messages { max-height: 250px; min-height: 150px; }
+            .status-info .title { font-size: 13px; }
+            .status-info .sub { font-size: 11px; }
+            .support-number-item { padding: 8px 10px; }
+            .support-number-item .flag { font-size: 18px; }
         }
     </style>
 </head>
@@ -515,8 +463,21 @@
         </div>
     </header>
 
-    <!-- ============ CHAT ============ -->
-    <main class="chat-container">
+    <!-- ============ EMAIL CONTAINER ============ -->
+    <div class="email-container" id="emailContainer">
+        <div class="email-card">
+            <div class="icon">💬</div>
+            <h2>Start a Conversation</h2>
+            <p>Enter your email to chat with our support team.</p>
+            <div class="email-error" id="emailError">Please enter a valid email</div>
+            <input type="email" id="emailInput" placeholder="Enter your email address..." />
+            <input type="text" id="nameInput" placeholder="Your name (optional)" />
+            <button class="btn" id="startChatBtn">Start Chat</button>
+        </div>
+    </div>
+
+    <!-- ============ CHAT CONTAINER ============ -->
+    <div class="chat-container" id="chatContainer">
         <div class="container">
 
             <!-- Status -->
@@ -547,33 +508,34 @@
             <!-- Support Numbers -->
             <div class="support-numbers-section">
                 <h4>📞 Support Numbers</h4>
-                <div class="support-numbers-list" id="supportNumbers">
-                    <!-- Dynamically loaded -->
-                </div>
+                <div class="support-numbers-list" id="supportNumbers"></div>
                 <div id="emptySupport" class="empty-support" style="display: none;">
                     📭 No support numbers added yet
                 </div>
             </div>
 
         </div>
-    </main>
+    </div>
 
     <script src="/socket.io/socket.io.js"></script>
     <script>
-        // ============ CONFIG ============
-        // ✅ Visitor ID stored in localStorage - PERSISTENT!
-        let visitorId = localStorage.getItem('blaze_visitor_id');
-        if (!visitorId) {
-            visitorId = 'visitor_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6);
-            localStorage.setItem('blaze_visitor_id', visitorId);
-        }
-
-        let visitorName = 'Guest';
+        // ============ STATE ============
+        let visitorId = null;
+        let userEmail = '';
+        let userName = '';
         let adminName = 'Support Team';
         let isOnline = true;
         let messagesLoaded = false;
+        let socket = null;
 
         // ============ DOM REFS ============
+        const emailContainer = document.getElementById('emailContainer');
+        const chatContainer = document.getElementById('chatContainer');
+        const emailInput = document.getElementById('emailInput');
+        const nameInput = document.getElementById('nameInput');
+        const startChatBtn = document.getElementById('startChatBtn');
+        const emailError = document.getElementById('emailError');
+
         const messages = document.getElementById('messages');
         const chatInput = document.getElementById('chatInput');
         const chatSendBtn = document.getElementById('chatSendBtn');
@@ -584,43 +546,116 @@
         const supportNumbers = document.getElementById('supportNumbers');
         const emptySupport = document.getElementById('emptySupport');
 
-        // ============ SOCKET.IO ============
-        const socket = io();
-
-        // ============ LOCAL STORAGE FUNCTIONS ============
-        function getLocalMessages() {
-            try {
-                const stored = localStorage.getItem('blaze_chat_messages');
-                return stored ? JSON.parse(stored) : [];
-            } catch (e) {
-                return [];
+        // ============ TOAST ============
+        function showToast(message, type = 'info') {
+            let toast = document.getElementById('toast');
+            if (!toast) {
+                toast = document.createElement('div');
+                toast.id = 'toast';
+                toast.className = 'toast';
+                document.body.appendChild(toast);
             }
+            toast.textContent = message;
+            toast.className = 'toast ' + type + ' show';
+            clearTimeout(toast._timeout);
+            toast._timeout = setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
         }
 
-        function saveLocalMessages(messagesArray) {
-            try {
-                localStorage.setItem('blaze_chat_messages', JSON.stringify(messagesArray));
-            } catch (e) {
-                console.error('Error saving messages to localStorage:', e);
-            }
-        }
+        // ============ START CHAT ============
+        startChatBtn.addEventListener('click', async () => {
+            const email = emailInput.value.trim();
+            const name = nameInput.value.trim() || email.split('@')[0] || 'Guest';
 
-        function addMessageToLocalStorage(message, isAdmin = false, adminNameText = '') {
-            const messages = getLocalMessages();
-            messages.push({
-                id: Date.now() + '_' + Math.random().toString(36).substr(2, 4),
-                message: message,
-                isAdmin: isAdmin,
-                adminName: adminNameText || 'Support Team',
-                timestamp: new Date().toISOString(),
-                visitorId: visitorId
+            if (!email || !email.includes('@')) {
+                emailError.textContent = 'Please enter a valid email address';
+                emailError.classList.add('show');
+                return;
+            }
+
+            emailError.classList.remove('show');
+
+            try {
+                const res = await fetch('/api/chat/session', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, name })
+                });
+
+                const data = await res.json();
+                if (data.session) {
+                    visitorId = data.visitorId;
+                    userEmail = email;
+                    userName = name;
+
+                    // Save to localStorage
+                    localStorage.setItem('blaze_visitor_id', visitorId);
+                    localStorage.setItem('blaze_user_email', email);
+                    localStorage.setItem('blaze_user_name', name);
+
+                    // Show chat
+                    emailContainer.style.display = 'none';
+                    chatContainer.classList.add('active');
+
+                    // Connect socket
+                    connectSocket();
+
+                    // Load messages
+                    await loadMessageHistory();
+
+                    // Enable input
+                    chatInput.disabled = false;
+                    chatSendBtn.disabled = false;
+                    chatInput.placeholder = 'Type your message...';
+
+                    showToast('✅ Connected!', 'success');
+                }
+            } catch (error) {
+                console.error('Error starting chat:', error);
+                showToast('Error connecting. Please try again.', 'error');
+            }
+        });
+
+        // Enter key for email
+        emailInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') startChatBtn.click();
+        });
+        nameInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') startChatBtn.click();
+        });
+
+        // ============ CONNECT SOCKET ============
+        function connectSocket() {
+            if (socket) socket.disconnect();
+            socket = io();
+
+            socket.on('connect', () => {
+                console.log('✅ Socket connected');
+                socket.emit('join-room', visitorId);
             });
-            saveLocalMessages(messages);
-            return messages;
-        }
 
-        function clearLocalMessages() {
-            localStorage.removeItem('blaze_chat_messages');
+            socket.on('admin-reply', (data) => {
+                addMessageToUI(data.message, true, data.adminName);
+            });
+
+            socket.on('message-deleted', (data) => {
+                if (data.visitorId === visitorId) {
+                    loadMessageHistory();
+                }
+            });
+
+            socket.on('session-cleared', (data) => {
+                if (data.visitorId === visitorId) {
+                    messages.innerHTML = '';
+                    emptyMessages.style.display = 'block';
+                    loadMessageHistory();
+                }
+            });
+
+            socket.on('disconnect', () => {
+                console.log('⚠️ Socket disconnected');
+            });
         }
 
         // ============ FETCH SETTINGS ============
@@ -644,17 +679,21 @@
                 statusText.textContent = 'Online - Replies within seconds';
                 statusBadge.textContent = '🟢 Online';
                 statusBadge.className = 'status-badge';
-                chatInput.disabled = false;
-                chatSendBtn.disabled = false;
-                chatInput.placeholder = 'Type your message...';
+                if (chatInput) {
+                    chatInput.disabled = false;
+                    chatSendBtn.disabled = false;
+                    chatInput.placeholder = 'Type your message...';
+                }
             } else {
                 statusDot.className = 'status-dot offline';
                 statusText.textContent = 'Offline - Please try again later';
                 statusBadge.textContent = '🔴 Offline';
                 statusBadge.className = 'status-badge offline';
-                chatInput.disabled = true;
-                chatSendBtn.disabled = true;
-                chatInput.placeholder = 'Support is currently offline';
+                if (chatInput) {
+                    chatInput.disabled = true;
+                    chatSendBtn.disabled = true;
+                    chatInput.placeholder = 'Support is currently offline';
+                }
             }
         }
 
@@ -711,67 +750,30 @@
             scrollToBottom();
         }
 
-        // ============ LOAD MESSAGES FROM LOCAL STORAGE ============
-        function loadMessagesFromLocalStorage() {
-            const storedMessages = getLocalMessages();
-            
-            // Filter messages for this visitor
-            const visitorMessages = storedMessages.filter(m => m.visitorId === visitorId);
-            
-            if (visitorMessages.length > 0) {
-                emptyMessages.style.display = 'none';
-                visitorMessages.forEach(msg => {
-                    addMessageToUI(msg.message, msg.isAdmin, msg.adminName);
-                });
-                console.log(`✅ Loaded ${visitorMessages.length} messages from localStorage`);
-            } else {
-                console.log('📭 No messages in localStorage for this visitor');
-            }
-            
-            return visitorMessages;
-        }
+        // ============ LOAD MESSAGE HISTORY ============
+        async function loadMessageHistory() {
+            if (!visitorId) return;
 
-        // ============ SYNC WITH DATABASE ============
-        async function syncWithDatabase() {
             try {
                 const res = await fetch(`/api/chat/messages/${visitorId}`);
                 const data = await res.json();
                 
                 if (data.messages && data.messages.length > 0) {
-                    // Get local messages
-                    let localMessages = getLocalMessages();
-                    const localIds = localMessages.map(m => m.id || m._id);
-                    
-                    // Add messages from database that aren't in localStorage
-                    let addedCount = 0;
-                    data.messages.forEach(dbMsg => {
-                        const msgId = dbMsg._id || dbMsg.id;
-                        if (!localIds.includes(msgId)) {
-                            // Add to localStorage
-                            localMessages.push({
-                                id: msgId,
-                                message: dbMsg.message,
-                                isAdmin: dbMsg.isFromAdmin || false,
-                                adminName: dbMsg.adminName || 'Support Team',
-                                timestamp: dbMsg.timestamp || new Date().toISOString(),
-                                visitorId: visitorId,
-                                _fromDB: true
-                            });
-                            addedCount++;
-                        }
+                    emptyMessages.style.display = 'none';
+                    messages.innerHTML = '';
+                    data.messages.forEach(msg => {
+                        const isAdmin = msg.isFromAdmin || false;
+                        const adminNameText = msg.adminName || 'Support Team';
+                        addMessageToUI(msg.message, isAdmin, adminNameText);
                     });
-                    
-                    if (addedCount > 0) {
-                        saveLocalMessages(localMessages);
-                        console.log(`✅ Synced ${addedCount} new messages from database`);
-                        
-                        // Reload UI to show synced messages
-                        messages.innerHTML = '';
-                        loadMessagesFromLocalStorage();
-                    }
+                    console.log(`✅ Loaded ${data.messages.length} messages from database`);
+                } else {
+                    emptyMessages.style.display = 'block';
                 }
+                
+                messagesLoaded = true;
             } catch (error) {
-                console.error('Error syncing with database:', error);
+                console.error('Error loading message history:', error);
             }
         }
 
@@ -785,108 +787,49 @@
                 return;
             }
 
-            const name = visitorName || 'Guest';
-
-            // ✅ Add to localStorage first (instant)
-            addMessageToLocalStorage(message, false);
-            addMessageToUI(message, false);
-
             chatSendBtn.disabled = true;
             chatSendBtn.textContent = 'Sending...';
 
-            // ✅ Send to database (background)
+            // Add to UI
+            addMessageToUI(message, false);
+
+            // Send to server
             try {
                 const res = await fetch('/api/chat/send', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         visitorId: visitorId,
-                        name: name,
+                        name: userName || 'Guest',
+                        email: userEmail,
                         message: message
                     })
                 });
 
                 const data = await res.json();
-                if (data.success) {
-                    console.log('✅ Message saved to database');
-                } else {
-                    console.error('❌ Failed to save to database:', data.error);
+                if (!data.success) {
+                    console.error('❌ Failed to save message:', data.error);
+                    showToast('⚠️ Message not saved. Please try again.', 'error');
                 }
             } catch (error) {
-                console.error('❌ Error sending to database:', error);
+                console.error('❌ Error sending message:', error);
+                showToast('⚠️ Error sending message. Please try again.', 'error');
             }
 
-            // ✅ Emit via socket for real-time
-            socket.emit('visitor-message', {
-                visitorId,
-                name: name,
-                message
-            });
+            // Emit via socket
+            if (socket) {
+                socket.emit('visitor-message', {
+                    visitorId,
+                    name: userName || 'Guest',
+                    email: userEmail,
+                    message
+                });
+            }
 
             chatInput.value = '';
             chatSendBtn.disabled = false;
             chatSendBtn.textContent = 'Send';
         }
-
-        // ============ TOAST ============
-        function showToast(message, type = 'info') {
-            const toast = document.getElementById('toast');
-            toast.textContent = message;
-            toast.className = 'toast ' + type + ' show';
-            clearTimeout(toast._timeout);
-            toast._timeout = setTimeout(() => {
-                toast.classList.remove('show');
-            }, 3000);
-        }
-
-        // ============ SOCKET EVENTS ============
-        socket.on('connect', () => {
-            console.log('✅ Socket connected');
-            socket.emit('join-room', visitorId);
-            
-            // ✅ Load from localStorage first (instant)
-            loadMessagesFromLocalStorage();
-            
-            // ✅ Then sync with database for any missed messages
-            setTimeout(() => {
-                syncWithDatabase();
-            }, 500);
-        });
-
-        socket.on('admin-reply', (data) => {
-            // ✅ Save to localStorage
-            addMessageToLocalStorage(data.message, true, data.adminName);
-            // ✅ Show in UI
-            addMessageToUI(data.message, true, data.adminName);
-        });
-
-        socket.on('message-deleted', (data) => {
-            if (data.visitorId === visitorId) {
-                // ✅ Remove from localStorage
-                let localMessages = getLocalMessages();
-                localMessages = localMessages.filter(m => m.id !== data.messageId);
-                saveLocalMessages(localMessages);
-                // ✅ Reload UI
-                messages.innerHTML = '';
-                loadMessagesFromLocalStorage();
-            }
-        });
-
-        socket.on('session-cleared', (data) => {
-            if (data.visitorId === visitorId) {
-                // ✅ Clear localStorage
-                clearLocalMessages();
-                // ✅ Clear UI
-                messages.innerHTML = '';
-                emptyMessages.style.display = 'block';
-                // ✅ Reload
-                loadMessagesFromLocalStorage();
-            }
-        });
-
-        socket.on('disconnect', () => {
-            console.log('⚠️ Socket disconnected');
-        });
 
         // ============ EVENT LISTENERS ============
         chatSendBtn.addEventListener('click', sendMessage);
@@ -894,27 +837,57 @@
             if (e.key === 'Enter') sendMessage();
         });
 
+        // ============ CHECK FOR EXISTING SESSION ============
+        async function checkExistingSession() {
+            const savedVisitorId = localStorage.getItem('blaze_visitor_id');
+            const savedEmail = localStorage.getItem('blaze_user_email');
+            const savedName = localStorage.getItem('blaze_user_name');
+
+            if (savedVisitorId && savedEmail) {
+                visitorId = savedVisitorId;
+                userEmail = savedEmail;
+                userName = savedName || savedEmail.split('@')[0] || 'Guest';
+
+                // Verify session still exists
+                try {
+                    const res = await fetch(`/api/chat/messages/${visitorId}`);
+                    const data = await res.json();
+                    if (data.session) {
+                        // Existing session found - skip email step
+                        emailContainer.style.display = 'none';
+                        chatContainer.classList.add('active');
+                        
+                        connectSocket();
+                        await loadMessageHistory();
+
+                        chatInput.disabled = false;
+                        chatSendBtn.disabled = false;
+                        chatInput.placeholder = 'Type your message...';
+
+                        console.log('✅ Restored existing session:', userEmail);
+                        return;
+                    }
+                } catch (error) {
+                    console.log('No existing session found');
+                }
+            }
+            
+            // No session - show email form
+            emailContainer.style.display = 'flex';
+            chatContainer.classList.remove('active');
+        }
+
         // ============ INIT ============
         async function init() {
             await fetchSettings();
             await fetchSupportNumbers();
-            
-            // ✅ Load from localStorage immediately
-            const localMessages = loadMessagesFromLocalStorage();
-            
-            // Show welcome message only if no messages
-            if (localMessages.length === 0) {
-                setTimeout(() => {
-                    addMessageToUI('👋 Welcome! How can we help you today?', true, 'Support Team');
-                }, 500);
-            }
+            await checkExistingSession();
         }
 
         init();
 
         console.log('🚀 BLAZE-XMD Support Chat loaded');
-        console.log('👤 Visitor ID:', visitorId);
-        console.log('💾 Messages saved in: localStorage + MongoDB');
+        console.log('💾 Messages saved in MongoDB by email');
     </script>
 </body>
 </html>
