@@ -628,7 +628,6 @@
         }
 
         function addMessage(message, isAdmin = false, adminNameText = '', isSystem = false) {
-            // Remove empty messages placeholder
             emptyMessages.style.display = 'none';
 
             const div = document.createElement('div');
@@ -677,10 +676,8 @@
             chatSendBtn.disabled = true;
             chatSendBtn.textContent = 'Sending...';
 
-            // Add user message to UI
             addMessage(message, false);
 
-            // Send to server
             socket.emit('visitor-message', {
                 visitorId,
                 name: visitorName,
@@ -719,7 +716,6 @@
         fetchSettings();
         fetchSupportNumbers();
 
-        // Welcome message after delay
         setTimeout(() => {
             if (messages.children.length === 0) {
                 addMessage('👋 Welcome! How can we help you today?', true, 'Support Team');
