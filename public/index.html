@@ -111,6 +111,7 @@
             font-size: 24px;
             font-weight: 800;
             color: var(--text);
+            text-decoration: none;
         }
 
         .logo span {
@@ -151,10 +152,6 @@
         .btn-pair:hover {
             transform: translateY(-2px);
             box-shadow: 0 8px 24px rgba(37, 211, 102, 0.3);
-        }
-
-        .btn-pair i {
-            font-size: 18px;
         }
 
         /* ============ HERO ============ */
@@ -407,7 +404,6 @@
             background: rgba(37, 211, 102, 0.05);
         }
 
-        /* Support Numbers */
         .support-numbers {
             margin-top: 16px;
             display: flex;
@@ -966,9 +962,9 @@
                     <div class="icon">💬</div>
                     <h3>Live Chat Support</h3>
                     <p>Chat with our support team in real-time. Get instant help with any issue.</p>
-                    <button class="btn-support" id="openChatBtn">
+                    <a href="/support" class="btn-support">
                         💬 Start Chat
-                    </button>
+                    </a>
                     <div style="margin-top: 12px; display: flex; align-items: center; gap: 8px;">
                         <span id="statusDot" style="display: inline-block; width: 8px; height: 8px; background: var(--primary); border-radius: 50%;"></span>
                         <span id="statusText" style="font-size: 13px; color: var(--muted);">Online</span>
@@ -1062,7 +1058,6 @@
         const statusText = document.getElementById('statusText');
         const statusDotChat = document.getElementById('statusDotChat');
         const chatStatusText = document.getElementById('chatStatusText');
-        const openChatBtn = document.getElementById('openChatBtn');
         const supportNumbers = document.getElementById('supportNumbers');
         const emptySupport = document.getElementById('emptySupport');
 
@@ -1152,10 +1147,6 @@
             chatWidget.classList.add('open');
             chatBadge.classList.remove('show');
             chatBadge.textContent = '0';
-            // Mark messages as read
-            fetch(`/api/admin/session/${visitorId}/messages`, {
-                headers: { 'Authorization': `Bearer ${localStorage.getItem('adminToken')}` }
-            }).catch(() => {});
             chatInput.focus();
             scrollToBottom();
         }
@@ -1170,13 +1161,13 @@
             }, 50);
         }
 
-        function addMessage(message, isAdmin = false, adminName = '') {
+        function addMessage(message, isAdmin = false, adminNameText = '') {
             const div = document.createElement('div');
             div.className = `chat-message ${isAdmin ? 'admin' : 'user'}`;
             
             let html = '';
-            if (isAdmin && adminName) {
-                html += `<span class="admin-name">${adminName}</span>`;
+            if (isAdmin && adminNameText) {
+                html += `<span class="admin-name">${adminNameText}</span>`;
             }
             html += message;
             html += `<span class="msg-time">${new Date().toLocaleTimeString()}</span>`;
@@ -1198,10 +1189,8 @@
             chatSendBtn.disabled = true;
             chatSendBtn.textContent = 'Sending...';
 
-            // Add user message to UI
             addMessage(message, false);
 
-            // Send to server
             socket.emit('visitor-message', {
                 visitorId,
                 name: visitorName,
@@ -1221,7 +1210,6 @@
 
         socket.on('admin-reply', (data) => {
             addMessage(data.message, true, data.adminName);
-            // Play notification sound
             if (!chatWidget.classList.contains('open')) {
                 chatBadge.textContent = parseInt(chatBadge.textContent) + 1;
                 chatBadge.classList.add('show');
@@ -1242,7 +1230,6 @@
         // ============ EVENT LISTENERS ============
         chatButton.addEventListener('click', openChat);
         chatClose.addEventListener('click', closeChat);
-        openChatBtn.addEventListener('click', openChat);
 
         chatSendBtn.addEventListener('click', sendMessage);
         chatInput.addEventListener('keydown', (e) => {
@@ -1253,7 +1240,6 @@
         fetchSettings();
         fetchSupportNumbers();
 
-        // Welcome message
         setTimeout(() => {
             addMessage('👋 Hello! How can I help you today?', true, 'Support Team');
         }, 500);
