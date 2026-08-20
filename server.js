@@ -357,16 +357,20 @@ io.on('connection', (socket) => {
   });
 });
 
-// ============ SERVE FRONTEND ============
+// ============ SERVE FRONTEND - CLEAN URLs ============
+
+// Landing page
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
+// Support page - /support (clean URL)
 app.get('/support', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'support.html'));
 });
 
-app.get('/admin', (req, res) => {
+// Admin page - /blazesupport (custom URL)
+app.get('/blazesupport', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'admin.html'));
 });
 
@@ -376,5 +380,5 @@ server.listen(PORT, () => {
   console.log(`🚀 Server running on http://localhost:${PORT}`);
   console.log(`📱 Landing: http://localhost:${PORT}`);
   console.log(`💬 Support: http://localhost:${PORT}/support`);
-  console.log(`🔐 Admin: http://localhost:${PORT}/admin`);
+  console.log(`🔐 Admin: http://localhost:${PORT}/blazesupport`);
 });
