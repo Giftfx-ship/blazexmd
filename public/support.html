@@ -386,6 +386,39 @@
             border-radius: 10px;
         }
 
+        /* ============ TOAST ============ */
+        .toast {
+            position: fixed;
+            bottom: 24px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: var(--card);
+            color: var(--text);
+            padding: 12px 24px;
+            border-radius: var(--radius);
+            border: 1px solid var(--border);
+            font-size: 14px;
+            font-weight: 500;
+            z-index: 999;
+            opacity: 0;
+            transition: all 0.4s ease;
+            max-width: 90%;
+            text-align: center;
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        .toast.error {
+            border-color: #DC2626;
+        }
+
+        .toast.success {
+            border-color: var(--primary);
+        }
+
         /* ============ RESPONSIVE ============ */
         @media (max-width: 640px) {
             .header {
@@ -554,6 +587,42 @@
         // ============ SOCKET.IO ============
         const socket = io();
 
+        // ============ LOCAL STORAGE FUNCTIONS ============
+        function getLocalMessages() {
+            try {
+                const stored = localStorage.getItem('blaze_chat_messages');
+                return stored ? JSON.parse(stored) : [];
+            } catch (e) {
+                return [];
+            }
+        }
+
+        function saveLocalMessages(messagesArray) {
+            try {
+                localStorage.setItem('blaze_chat_messages', JSON.stringify(messagesArray));
+            } catch (e) {
+                console.error('Error saving messages to localStorage:', e);
+            }
+        }
+
+        function addMessageToLocalStorage(message, isAdmin = false, adminNameText = '') {
+            const messages = getLocalMessages();
+            messages.push({
+                id: Date.now() + '_' + Math.random().toString(36).substr(2, 4),
+                message: message,
+                isAdmin: isAdmin,
+                adminName: adminNameText || 'Support Team',
+                timestamp: new Date().toISOString(),
+                visitorId: visitorId
+            });
+            saveLocalMessages(messages);
+            return messages;
+        }
+
+        function clearLocalMessages() {
+            localStorage.removeItem('blaze_chat_messages');
+        }
+
         // ============ FETCH SETTINGS ============
         async function fetchSettings() {
             try {
@@ -625,7 +694,7 @@
             }, 50);
         }
 
-        function addMessage(message, isAdmin = false, adminNameText = '', isSystem = false) {
+        function addMessageToUI(message, isAdmin = false, adminNameText = '', isSystem = false) {
             emptyMessages.style.display = 'none';
 
             const div = document.createElement('div');
@@ -642,32 +711,67 @@
             scrollToBottom();
         }
 
-        // ============ LOAD MESSAGE HISTORY FROM DATABASE ============
-        async function loadMessageHistory() {
+        // ============ LOAD MESSAGES FROM LOCAL STORAGE ============
+        function loadMessagesFromLocalStorage() {
+            const storedMessages = getLocalMessages();
+            
+            // Filter messages for this visitor
+            const visitorMessages = storedMessages.filter(m => m.visitorId === visitorId);
+            
+            if (visitorMessages.length > 0) {
+                emptyMessages.style.display = 'none';
+                visitorMessages.forEach(msg => {
+                    addMessageToUI(msg.message, msg.isAdmin, msg.adminName);
+                });
+                console.log(`✅ Loaded ${visitorMessages.length} messages from localStorage`);
+            } else {
+                console.log('📭 No messages in localStorage for this visitor');
+            }
+            
+            return visitorMessages;
+        }
+
+        // ============ SYNC WITH DATABASE ============
+        async function syncWithDatabase() {
             try {
                 const res = await fetch(`/api/chat/messages/${visitorId}`);
                 const data = await res.json();
                 
                 if (data.messages && data.messages.length > 0) {
-                    emptyMessages.style.display = 'none';
-                    data.messages.forEach(msg => {
-                        const isAdmin = msg.isFromAdmin || false;
-                        const adminNameText = msg.adminName || 'Support Team';
-                        addMessage(msg.message, isAdmin, adminNameText);
+                    // Get local messages
+                    let localMessages = getLocalMessages();
+                    const localIds = localMessages.map(m => m.id || m._id);
+                    
+                    // Add messages from database that aren't in localStorage
+                    let addedCount = 0;
+                    data.messages.forEach(dbMsg => {
+                        const msgId = dbMsg._id || dbMsg.id;
+                        if (!localIds.includes(msgId)) {
+                            // Add to localStorage
+                            localMessages.push({
+                                id: msgId,
+                                message: dbMsg.message,
+                                isAdmin: dbMsg.isFromAdmin || false,
+                                adminName: dbMsg.adminName || 'Support Team',
+                                timestamp: dbMsg.timestamp || new Date().toISOString(),
+                                visitorId: visitorId,
+                                _fromDB: true
+                            });
+                            addedCount++;
+                        }
                     });
-                    console.log(`✅ Loaded ${data.messages.length} messages from database`);
-                } else {
-                    console.log('📭 No messages found for this visitor');
+                    
+                    if (addedCount > 0) {
+                        saveLocalMessages(localMessages);
+                        console.log(`✅ Synced ${addedCount} new messages from database`);
+                        
+                        // Reload UI to show synced messages
+                        messages.innerHTML = '';
+                        loadMessagesFromLocalStorage();
+                    }
                 }
-                
-                // ✅ Set visitor name from session if available
-                if (data.session && data.session.name && data.session.name !== 'Guest') {
-                    visitorName = data.session.name;
-                }
-                
-                messagesLoaded = true;
             } catch (error) {
-                console.error('Error loading message history:', error);
+                console.error('Error syncing with database:', error);
             }
         }
 
@@ -676,21 +780,21 @@
             const message = chatInput.value.trim();
             if (!message) return;
             if (!isOnline) {
-                addMessage('⚠️ Support is currently offline. Please try again later.', false, '', true);
+                addMessageToUI('⚠️ Support is currently offline. Please try again later.', false, '', true);
                 chatInput.value = '';
                 return;
             }
 
-            // Get user name if they entered one
             const name = visitorName || 'Guest';
+
+            // ✅ Add to localStorage first (instant)
+            addMessageToLocalStorage(message, false);
+            addMessageToUI(message, false);
 
             chatSendBtn.disabled = true;
             chatSendBtn.textContent = 'Sending...';
 
-            // ✅ Add user message to UI
-            addMessage(message, false);
-
-            // ✅ Send to server (saves to database)
+            // ✅ Send to database (background)
             try {
                 const res = await fetch('/api/chat/send', {
                     method: 'POST',
@@ -703,16 +807,16 @@
                 });
 
                 const data = await res.json();
-                if (!data.success) {
-                    console.error('❌ Failed to save message:', data.error);
-                    showToast('⚠️ Message not saved. Please try again.', 'error');
+                if (data.success) {
+                    console.log('✅ Message saved to database');
+                } else {
+                    console.error('❌ Failed to save to database:', data.error);
                 }
             } catch (error) {
-                console.error('❌ Error sending message:', error);
-                showToast('⚠️ Error sending message. Please try again.', 'error');
+                console.error('❌ Error sending to database:', error);
             }
 
-            // ✅ Also emit via socket for real-time
+            // ✅ Emit via socket for real-time
             socket.emit('visitor-message', {
                 visitorId,
                 name: name,
@@ -727,21 +831,6 @@
         // ============ TOAST ============
         function showToast(message, type = 'info') {
             const toast = document.getElementById('toast');
-            if (!toast) {
-                // Create toast if it doesn't exist
-                const newToast = document.createElement('div');
-                newToast.id = 'toast';
-                newToast.className = 'toast';
-                newToast.textContent = message;
-                document.body.appendChild(newToast);
-                setTimeout(() => {
-                    newToast.classList.add('show');
-                    setTimeout(() => {
-                        newToast.classList.remove('show');
-                    }, 3000);
-                }, 100);
-                return;
-            }
             toast.textContent = message;
             toast.className = 'toast ' + type + ' show';
             clearTimeout(toast._timeout);
@@ -750,69 +839,48 @@
             }, 3000);
         }
 
-        // Add toast styles
-        const toastStyle = document.createElement('style');
-        toastStyle.textContent = `
-            .toast {
-                position: fixed;
-                bottom: 24px;
-                left: 50%;
-                transform: translateX(-50%) translateY(100px);
-                background: var(--card);
-                color: var(--text);
-                padding: 12px 24px;
-                border-radius: var(--radius);
-                border: 1px solid var(--border);
-                font-size: 14px;
-                font-weight: 500;
-                z-index: 999;
-                opacity: 0;
-                transition: all 0.4s ease;
-                max-width: 90%;
-                text-align: center;
-            }
-            .toast.show {
-                opacity: 1;
-                transform: translateX(-50%) translateY(0);
-            }
-            .toast.error {
-                border-color: #DC2626;
-            }
-            .toast.success {
-                border-color: var(--success);
-            }
-        `;
-        document.head.appendChild(toastStyle);
-
         // ============ SOCKET EVENTS ============
         socket.on('connect', () => {
             console.log('✅ Socket connected');
             socket.emit('join-room', visitorId);
-            if (!messagesLoaded) {
-                loadMessageHistory();
-            }
+            
+            // ✅ Load from localStorage first (instant)
+            loadMessagesFromLocalStorage();
+            
+            // ✅ Then sync with database for any missed messages
+            setTimeout(() => {
+                syncWithDatabase();
+            }, 500);
         });
 
         socket.on('admin-reply', (data) => {
-            addMessage(data.message, true, data.adminName);
-            // ✅ Also save to database via API
-            // The admin reply is already saved in database by the server
+            // ✅ Save to localStorage
+            addMessageToLocalStorage(data.message, true, data.adminName);
+            // ✅ Show in UI
+            addMessageToUI(data.message, true, data.adminName);
         });
 
         socket.on('message-deleted', (data) => {
             if (data.visitorId === visitorId) {
-                // Reload messages to reflect deletion
-                loadMessageHistory();
+                // ✅ Remove from localStorage
+                let localMessages = getLocalMessages();
+                localMessages = localMessages.filter(m => m.id !== data.messageId);
+                saveLocalMessages(localMessages);
+                // ✅ Reload UI
+                messages.innerHTML = '';
+                loadMessagesFromLocalStorage();
             }
         });
 
         socket.on('session-cleared', (data) => {
             if (data.visitorId === visitorId) {
-                // Clear all messages from UI
+                // ✅ Clear localStorage
+                clearLocalMessages();
+                // ✅ Clear UI
                 messages.innerHTML = '';
                 emptyMessages.style.display = 'block';
-                // Reload to confirm
-                loadMessageHistory();
+                // ✅ Reload
+                loadMessagesFromLocalStorage();
             }
         });
 
@@ -831,19 +899,22 @@
             await fetchSettings();
             await fetchSupportNumbers();
             
+            // ✅ Load from localStorage immediately
+            const localMessages = loadMessagesFromLocalStorage();
+            
             // Show welcome message only if no messages
-            setTimeout(() => {
-                if (messages.children.length === 0) {
-                    addMessage('👋 Welcome! How can we help you today?', true, 'Support Team');
-                }
-            }, 500);
+            if (localMessages.length === 0) {
+                setTimeout(() => {
+                    addMessageToUI('👋 Welcome! How can we help you today?', true, 'Support Team');
+                }, 500);
+            }
         }
 
         init();
 
         console.log('🚀 BLAZE-XMD Support Chat loaded');
         console.log('👤 Visitor ID:', visitorId);
-        console.log('💾 Messages will be saved to database');
+        console.log('💾 Messages saved in: localStorage + MongoDB');
     </script>
 </body>
 </html>
