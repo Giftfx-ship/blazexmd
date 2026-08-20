@@ -19,6 +19,7 @@ const io = socketIO(server, {
 });
 
 // ============ MIDDLEWARE ============
+app.set('trust proxy', 1);
 app.use(cors());
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
@@ -39,7 +40,6 @@ mongoose.connect(process.env.MONGODB_URI, {
 
 // ============ MODELS ============
 
-// Chat Message Schema
 const ChatMessageSchema = new mongoose.Schema({
   visitorId: { type: String, required: true, index: true },
   email: { type: String, required: true, index: true },
@@ -51,7 +51,6 @@ const ChatMessageSchema = new mongoose.Schema({
   timestamp: { type: Date, default: Date.now }
 });
 
-// Chat Session Schema
 const ChatSessionSchema = new mongoose.Schema({
   visitorId: { type: String, required: true, unique: true },
   email: { type: String, required: true, index: true },
@@ -63,7 +62,6 @@ const ChatSessionSchema = new mongoose.Schema({
   createdAt: { type: Date, default: Date.now }
 });
 
-// Support Number Schema
 const SupportSchema = new mongoose.Schema({
   name: { type: String, required: true },
   phone: { type: String, required: true },
@@ -72,14 +70,12 @@ const SupportSchema = new mongoose.Schema({
   isActive: { type: Boolean, default: true }
 });
 
-// Settings Schema
 const SettingsSchema = new mongoose.Schema({
   isOnline: { type: Boolean, default: true },
   adminName: { type: String, default: 'Support Team' },
   welcomeMessage: { type: String, default: 'Hello! How can I help you?' }
 });
 
-// Admin Schema
 const AdminSchema = new mongoose.Schema({
   username: { type: String, required: true, unique: true },
   password: { type: String, required: true }
@@ -227,7 +223,7 @@ app.delete('/api/admin/support/:id', authenticate, async (req, res) => {
 
 // ============ CHAT API ROUTES ============
 
-// ✅ Check if email exists
+// Check if email exists
 app.post('/api/chat/check-email', async (req, res) => {
   try {
     const { email } = req.body;
@@ -255,7 +251,7 @@ app.post('/api/chat/check-email', async (req, res) => {
   }
 });
 
-// ✅ Create new session (deletes old one if exists)
+// Create new session (deletes old one if exists)
 app.post('/api/chat/session', async (req, res) => {
   try {
     const { email, name } = req.body;
@@ -266,11 +262,11 @@ app.post('/api/chat/session', async (req, res) => {
     
     const visitorId = 'user_' + email.toLowerCase().replace(/[^a-zA-Z0-9]/g, '_');
     
-    // ✅ Delete old session and messages if they exist
+    // Delete old session and messages if they exist
     await ChatSession.deleteOne({ visitorId });
     await ChatMessage.deleteMany({ visitorId });
     
-    // ✅ Create new session
+    // Create new session
     const session = await ChatSession.create({
       visitorId,
       email: email.toLowerCase(),
@@ -290,7 +286,7 @@ app.post('/api/chat/session', async (req, res) => {
   }
 });
 
-// ✅ Get messages by visitorId
+// Get messages by visitorId
 app.get('/api/chat/messages/:visitorId', async (req, res) => {
   try {
     const { visitorId } = req.params;
@@ -302,7 +298,7 @@ app.get('/api/chat/messages/:visitorId', async (req, res) => {
   }
 });
 
-// ✅ Send message (visitor)
+// Send message (visitor)
 app.post('/api/chat/send', async (req, res) => {
   try {
     const { visitorId, name, email, message } = req.body;
@@ -403,7 +399,7 @@ app.get('/api/admin/unread-count', authenticate, async (req, res) => {
   }
 });
 
-// Admin reply
+// Admin reply - FIXED
 app.post('/api/admin/reply', authenticate, async (req, res) => {
   try {
     const { visitorId, message } = req.body;
@@ -415,8 +411,16 @@ app.post('/api/admin/reply', authenticate, async (req, res) => {
     const settings = await Settings.findOne();
     const adminName = settings?.adminName || 'Support Team';
     
+    // Get session to get email
+    const session = await ChatSession.findOne({ visitorId });
+    if (!session) {
+      return res.status(404).json({ error: 'Session not found' });
+    }
+    
     const newMessage = await ChatMessage.create({
       visitorId,
+      email: session.email,
+      name: session.name || 'Guest',
       message,
       isFromAdmin: true,
       adminName: adminName,
@@ -556,8 +560,13 @@ io.on('connection', (socket) => {
       const settings = await Settings.findOne();
       const adminName = settings?.adminName || 'Support Team';
       
+      const session = await ChatSession.findOne({ visitorId });
+      if (!session) return;
+      
       const newMessage = await ChatMessage.create({
         visitorId,
+        email: session.email,
+        name: session.name || 'Guest',
         message,
         isFromAdmin: true,
         adminName: adminName,
