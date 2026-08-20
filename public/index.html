@@ -4,8 +4,12 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>BLAZE-XMD · WhatsApp Bot</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
     <style>
+        /* ============================================================
+           ROOT & RESET
+           ============================================================ */
         * {
             margin: 0;
             padding: 0;
@@ -16,27 +20,104 @@
             --primary: #25D366;
             --primary-dark: #075E54;
             --primary-teal: #128C7E;
+            --primary-glow: rgba(37, 211, 102, 0.25);
             --bg: #0A0A0A;
+            --bg-card: rgba(255,255,255,0.03);
             --card: #1A1A1A;
             --card-hover: #242424;
             --text: #FFFFFF;
             --muted: #94A3B8;
-            --border: #2A2A2A;
+            --border: rgba(255,255,255,0.06);
             --radius: 16px;
-            --shadow: 0 8px 32px rgba(0,0,0,0.3);
-            --transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            --radius-xl: 24px;
+            --shadow: 0 8px 40px rgba(0,0,0,0.4);
+            --transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            --success: #22C55E;
+            --danger: #DC2626;
+            --warning: #F59E0B;
+        }
+
+        html {
+            scroll-behavior: smooth;
         }
 
         body {
-            font-family: 'Inter', -apple-system, sans-serif;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
             background: var(--bg);
             color: var(--text);
             line-height: 1.6;
             min-height: 100vh;
+            -webkit-font-smoothing: antialiased;
             overflow-x: hidden;
         }
 
-        /* ============ LOADING ============ */
+        /* ============================================================
+           ANIMATED BACKGROUND
+           ============================================================ */
+        .bg-glow {
+            position: fixed;
+            inset: 0;
+            z-index: -1;
+            overflow: hidden;
+        }
+
+        .bg-glow .orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(120px);
+            opacity: 0.25;
+            animation: orbFloat 30s ease-in-out infinite alternate;
+        }
+
+        .bg-glow .orb-1 {
+            width: 700px;
+            height: 700px;
+            background: var(--primary);
+            top: -300px;
+            right: -200px;
+            animation-delay: 0s;
+        }
+
+        .bg-glow .orb-2 {
+            width: 600px;
+            height: 600px;
+            background: var(--primary-teal);
+            bottom: -300px;
+            left: -200px;
+            animation-delay: -10s;
+        }
+
+        .bg-glow .orb-3 {
+            width: 500px;
+            height: 500px;
+            background: var(--primary-dark);
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            animation-delay: -20s;
+        }
+
+        .bg-glow .orb-4 {
+            width: 400px;
+            height: 400px;
+            background: #8B5CF6;
+            top: 20%;
+            right: 30%;
+            animation-delay: -5s;
+            opacity: 0.1;
+        }
+
+        @keyframes orbFloat {
+            0% { transform: translate(0, 0) scale(1) rotate(0deg); }
+            25% { transform: translate(60px, -80px) scale(1.1) rotate(5deg); }
+            50% { transform: translate(-40px, 70px) scale(0.9) rotate(-3deg); }
+            75% { transform: translate(80px, 40px) scale(1.05) rotate(8deg); }
+            100% { transform: translate(-20px, -30px) scale(0.95) rotate(-5deg); }
+        }
+
+        /* ============================================================
+           LOADER
+           ============================================================ */
         .loader {
             position: fixed;
             inset: 0;
@@ -46,7 +127,7 @@
             align-items: center;
             justify-content: center;
             z-index: 9999;
-            transition: opacity 0.6s ease, visibility 0.6s ease;
+            transition: opacity 0.8s ease, visibility 0.8s ease;
         }
 
         .loader.hidden {
@@ -54,19 +135,55 @@
             visibility: hidden;
         }
 
+        .loader-ring {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            border: 3px solid transparent;
+            border-top-color: var(--primary);
+            border-bottom-color: var(--primary-teal);
+            animation: spin 1s linear infinite;
+            position: relative;
+        }
+
+        .loader-ring::before {
+            content: '';
+            position: absolute;
+            inset: 8px;
+            border-radius: 50%;
+            border: 3px solid transparent;
+            border-left-color: var(--primary-teal);
+            border-right-color: var(--primary);
+            animation: spin 0.8s linear infinite reverse;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
         .loader-logo {
-            font-size: 48px;
+            font-size: 32px;
             font-weight: 900;
-            color: var(--primary);
-            animation: pulse 1.5s ease infinite;
+            margin-top: 24px;
+            background: linear-gradient(135deg, var(--primary), var(--primary-teal));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .loader-sub {
+            color: var(--muted);
+            font-size: 13px;
+            margin-top: 4px;
+            letter-spacing: 3px;
+            text-transform: uppercase;
         }
 
         .loader-bar {
             width: 200px;
-            height: 3px;
+            height: 2px;
             background: var(--border);
             border-radius: 4px;
-            margin-top: 20px;
+            margin-top: 24px;
             overflow: hidden;
         }
 
@@ -74,12 +191,7 @@
             height: 100%;
             background: linear-gradient(90deg, var(--primary), var(--primary-teal));
             border-radius: 4px;
-            animation: load 1.8s ease forwards;
-        }
-
-        @keyframes pulse {
-            0%, 100% { transform: scale(1); opacity: 1; }
-            50% { transform: scale(1.05); opacity: 0.7; }
+            animation: load 2.2s ease forwards;
         }
 
         @keyframes load {
@@ -87,24 +199,35 @@
             100% { width: 100%; }
         }
 
+        /* ============================================================
+           CONTAINER
+           ============================================================ */
         .container {
             max-width: 1120px;
             margin: 0 auto;
             padding: 0 24px;
+            width: 100%;
         }
 
-        /* ============ HEADER ============ */
+        /* ============================================================
+           HEADER
+           ============================================================ */
         .header {
-            padding: 20px 0;
+            padding: 18px 0;
             display: flex;
             justify-content: space-between;
             align-items: center;
             border-bottom: 1px solid var(--border);
             position: sticky;
             top: 0;
-            background: rgba(10,10,10,0.9);
-            backdrop-filter: blur(12px);
+            background: rgba(10,10,10,0.75);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
             z-index: 100;
+        }
+
+        .header.scrolled {
+            border-bottom-color: rgba(37, 211, 102, 0.15);
         }
 
         .logo {
@@ -112,6 +235,9 @@
             font-weight: 800;
             color: var(--text);
             text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
 
         .logo span {
@@ -119,25 +245,65 @@
         }
 
         .logo-icon {
-            display: inline-block;
-            width: 32px;
-            height: 32px;
-            background: var(--primary);
-            border-radius: 8px;
-            text-align: center;
-            line-height: 32px;
-            font-size: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 38px;
+            height: 38px;
+            background: linear-gradient(135deg, var(--primary), var(--primary-teal));
+            border-radius: 10px;
+            font-size: 18px;
             font-weight: 700;
             color: var(--bg);
-            margin-right: 8px;
+            box-shadow: 0 4px 20px var(--primary-glow);
+            transition: all var(--transition);
+        }
+
+        .logo:hover .logo-icon {
+            transform: rotate(-5deg) scale(1.05);
+            box-shadow: 0 6px 30px var(--primary-glow);
+        }
+
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .nav-links a {
+            color: var(--muted);
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all var(--transition);
+            position: relative;
+        }
+
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: -4px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: var(--primary);
+            transition: width var(--transition);
+        }
+
+        .nav-links a:hover {
+            color: var(--text);
+        }
+
+        .nav-links a:hover::after {
+            width: 100%;
         }
 
         .btn-pair {
-            padding: 10px 24px;
-            background: var(--primary);
+            padding: 10px 28px;
+            background: linear-gradient(135deg, var(--primary), var(--primary-teal));
             color: var(--bg);
             border: none;
-            border-radius: 10px;
+            border-radius: 60px;
             font-weight: 700;
             font-size: 14px;
             cursor: pointer;
@@ -147,54 +313,70 @@
             display: inline-flex;
             align-items: center;
             gap: 8px;
+            box-shadow: 0 4px 24px var(--primary-glow);
         }
 
         .btn-pair:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 24px rgba(37, 211, 102, 0.3);
+            transform: translateY(-2px) scale(1.02);
+            box-shadow: 0 8px 40px var(--primary-glow);
         }
 
-        /* ============ HERO ============ */
+        .btn-pair i {
+            font-size: 16px;
+        }
+
+        .menu-toggle {
+            display: none;
+            background: none;
+            border: none;
+            color: var(--text);
+            font-size: 24px;
+            cursor: pointer;
+        }
+
+        /* ============================================================
+           HERO
+           ============================================================ */
         .hero {
-            padding: 80px 0 60px;
+            padding: 120px 0 60px;
             text-align: center;
+            position: relative;
         }
 
         .hero-badge {
             display: inline-block;
-            padding: 4px 16px;
-            background: rgba(37, 211, 102, 0.15);
+            padding: 6px 20px;
+            background: rgba(37, 211, 102, 0.1);
             color: var(--primary);
             border-radius: 100px;
             font-size: 12px;
             font-weight: 600;
             letter-spacing: 0.5px;
-            margin-bottom: 20px;
+            border: 1px solid rgba(37, 211, 102, 0.12);
+            margin-bottom: 24px;
+            animation: fadeUp 0.8s ease both;
         }
 
         .hero h1 {
-            font-size: 52px;
+            font-size: 64px;
             font-weight: 900;
-            letter-spacing: -1px;
-            line-height: 1.1;
-            margin-bottom: 16px;
+            letter-spacing: -2px;
+            line-height: 1.05;
+            margin-bottom: 20px;
+            animation: fadeUp 0.8s ease 0.1s both;
         }
 
-        .hero h1 span {
-            color: var(--primary);
-            position: relative;
+        .hero h1 .gradient-text {
+            background: linear-gradient(135deg, var(--primary), var(--primary-teal), #8B5CF6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-size: 200% 200%;
+            animation: gradientShift 4s ease infinite;
         }
 
-        .hero h1 span::after {
-            content: '';
-            position: absolute;
-            bottom: 4px;
-            left: 0;
-            width: 100%;
-            height: 4px;
-            background: var(--primary);
-            border-radius: 4px;
-            opacity: 0.4;
+        @keyframes gradientShift {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
         }
 
         .hero p {
@@ -202,22 +384,36 @@
             color: var(--muted);
             max-width: 600px;
             margin: 0 auto 32px;
+            line-height: 1.8;
+            animation: fadeUp 0.8s ease 0.2s both;
         }
 
         .hero-features {
             display: flex;
             justify-content: center;
-            gap: 24px;
+            gap: 12px;
             flex-wrap: wrap;
             margin-top: 24px;
+            animation: fadeUp 0.8s ease 0.3s both;
         }
 
         .hero-feature {
             display: flex;
             align-items: center;
             gap: 8px;
-            font-size: 14px;
+            font-size: 13px;
             color: var(--muted);
+            padding: 8px 18px;
+            background: var(--bg-card);
+            border-radius: 60px;
+            border: 1px solid var(--border);
+            transition: all var(--transition);
+        }
+
+        .hero-feature:hover {
+            border-color: var(--primary);
+            color: var(--text);
+            transform: translateY(-2px);
         }
 
         .hero-feature .dot {
@@ -228,23 +424,142 @@
             border-radius: 50%;
         }
 
-        /* ============ FEATURES ============ */
+        .hero-cta {
+            margin-top: 40px;
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+            flex-wrap: wrap;
+            animation: fadeUp 0.8s ease 0.4s both;
+        }
+
+        .btn-primary {
+            padding: 14px 40px;
+            background: linear-gradient(135deg, var(--primary), var(--primary-teal));
+            color: var(--bg);
+            border: none;
+            border-radius: 60px;
+            font-weight: 700;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all var(--transition);
+            text-decoration: none;
+            font-family: inherit;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 4px 28px var(--primary-glow);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 48px var(--primary-glow);
+        }
+
+        .btn-secondary {
+            padding: 14px 40px;
+            background: transparent;
+            color: var(--text);
+            border: 1.5px solid var(--border);
+            border-radius: 60px;
+            font-weight: 600;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all var(--transition);
+            text-decoration: none;
+            font-family: inherit;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .btn-secondary:hover {
+            border-color: var(--primary);
+            background: rgba(37, 211, 102, 0.05);
+            transform: translateY(-3px);
+        }
+
+        /* ============================================================
+           FLOATING PARTICLES
+           ============================================================ */
+        .particles {
+            position: absolute;
+            inset: 0;
+            overflow: hidden;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: var(--primary);
+            border-radius: 50%;
+            opacity: 0.3;
+            animation: particleFloat 20s ease-in-out infinite;
+        }
+
+        .particle:nth-child(1) { left: 10%; top: 20%; animation-delay: 0s; }
+        .particle:nth-child(2) { left: 20%; top: 60%; animation-delay: -3s; width: 6px; height: 6px; }
+        .particle:nth-child(3) { left: 30%; top: 30%; animation-delay: -6s; }
+        .particle:nth-child(4) { left: 40%; top: 70%; animation-delay: -9s; width: 5px; height: 5px; }
+        .particle:nth-child(5) { left: 50%; top: 15%; animation-delay: -12s; }
+        .particle:nth-child(6) { left: 60%; top: 50%; animation-delay: -15s; width: 7px; height: 7px; }
+        .particle:nth-child(7) { left: 70%; top: 25%; animation-delay: -18s; }
+        .particle:nth-child(8) { left: 80%; top: 65%; animation-delay: -21s; width: 4px; height: 4px; }
+        .particle:nth-child(9) { left: 90%; top: 40%; animation-delay: -24s; }
+        .particle:nth-child(10) { left: 15%; top: 85%; animation-delay: -27s; width: 6px; height: 6px; }
+
+        @keyframes particleFloat {
+            0%, 100% { transform: translateY(0) translateX(0) scale(1); opacity: 0.3; }
+            25% { transform: translateY(-30px) translateX(15px) scale(1.5); opacity: 0.6; }
+            50% { transform: translateY(20px) translateX(-10px) scale(0.8); opacity: 0.2; }
+            75% { transform: translateY(-15px) translateX(8px) scale(1.2); opacity: 0.5; }
+        }
+
+        /* ============================================================
+           FEATURES SECTION
+           ============================================================ */
         .features {
-            padding: 60px 0;
+            padding: 80px 0 60px;
+            position: relative;
+        }
+
+        .section-badge {
+            display: inline-block;
+            padding: 4px 16px;
+            background: rgba(37, 211, 102, 0.08);
+            color: var(--primary);
+            border-radius: 100px;
+            font-size: 12px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            border: 1px solid rgba(37, 211, 102, 0.08);
+            margin-bottom: 12px;
         }
 
         .section-title {
-            font-size: 32px;
+            font-size: 40px;
             font-weight: 800;
             text-align: center;
             margin-bottom: 12px;
+        }
+
+        .section-title .gradient-text {
+            background: linear-gradient(135deg, var(--primary), var(--primary-teal));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
 
         .section-subtitle {
             text-align: center;
             color: var(--muted);
             font-size: 16px;
-            margin-bottom: 40px;
+            margin-bottom: 48px;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
         }
 
         .features-grid {
@@ -254,24 +569,41 @@
         }
 
         .feature-card {
-            background: var(--card);
-            padding: 28px 24px;
-            border-radius: var(--radius);
+            background: var(--bg-card);
+            padding: 32px 28px;
+            border-radius: var(--radius-xl);
             border: 1px solid var(--border);
             transition: all var(--transition);
-            animation: fadeUp 0.6s ease both;
+            animation: fadeUp 0.7s ease both;
+            backdrop-filter: blur(10px);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .feature-card::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(37, 211, 102, 0.03), transparent);
+            opacity: 0;
+            transition: opacity var(--transition);
+        }
+
+        .feature-card:hover::before {
+            opacity: 1;
         }
 
         .feature-card:hover {
-            transform: translateY(-4px);
-            border-color: var(--primary);
-            box-shadow: 0 8px 32px rgba(37, 211, 102, 0.08);
-            background: var(--card-hover);
+            transform: translateY(-8px);
+            border-color: rgba(37, 211, 102, 0.2);
+            box-shadow: 0 12px 48px rgba(0,0,0,0.3);
         }
 
         .feature-icon {
-            font-size: 32px;
-            margin-bottom: 12px;
+            font-size: 40px;
+            margin-bottom: 16px;
+            display: block;
+            filter: drop-shadow(0 4px 20px rgba(37, 211, 102, 0.15));
         }
 
         .feature-card h3 {
@@ -286,8 +618,19 @@
             line-height: 1.7;
         }
 
+        .feature-card .feature-tag {
+            display: inline-block;
+            padding: 2px 12px;
+            background: rgba(37, 211, 102, 0.1);
+            color: var(--primary);
+            border-radius: 100px;
+            font-size: 11px;
+            font-weight: 600;
+            margin-top: 12px;
+        }
+
         @keyframes fadeUp {
-            from { opacity: 0; transform: translateY(20px); }
+            from { opacity: 0; transform: translateY(40px); }
             to { opacity: 1; transform: translateY(0); }
         }
 
@@ -298,41 +641,56 @@
         .feature-card:nth-child(5) { animation-delay: 0.25s; }
         .feature-card:nth-child(6) { animation-delay: 0.3s; }
 
-        /* ============ STATS ============ */
+        /* ============================================================
+           STATS
+           ============================================================ */
         .stats {
-            padding: 40px 0 60px;
+            padding: 40px 0 80px;
         }
 
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
             gap: 24px;
-            max-width: 600px;
+            max-width: 700px;
             margin: 0 auto;
         }
 
         .stat-card {
-            background: var(--card);
-            padding: 24px;
-            border-radius: var(--radius);
+            background: var(--bg-card);
+            padding: 32px 24px;
+            border-radius: var(--radius-xl);
             border: 1px solid var(--border);
             text-align: center;
+            backdrop-filter: blur(10px);
+            transition: all var(--transition);
+        }
+
+        .stat-card:hover {
+            border-color: rgba(37, 211, 102, 0.15);
+            transform: translateY(-4px);
         }
 
         .stat-number {
-            font-size: 32px;
+            font-size: 40px;
             font-weight: 800;
-            color: var(--primary);
+            background: linear-gradient(135deg, var(--primary), var(--primary-teal));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
 
         .stat-label {
             font-size: 13px;
             color: var(--muted);
+            margin-top: 4px;
+            font-weight: 500;
         }
 
-        /* ============ SUPPORT SECTION ============ */
+        /* ============================================================
+           SUPPORT SECTION
+           ============================================================ */
         .support-section {
-            padding: 60px 0;
+            padding: 40px 0 60px;
         }
 
         .support-grid {
@@ -342,21 +700,23 @@
         }
 
         .support-card {
-            background: var(--card);
-            padding: 32px;
-            border-radius: var(--radius);
+            background: var(--bg-card);
+            padding: 36px 32px;
+            border-radius: var(--radius-xl);
             border: 1px solid var(--border);
             transition: all var(--transition);
+            backdrop-filter: blur(10px);
         }
 
         .support-card:hover {
-            border-color: var(--primary);
-            transform: translateY(-2px);
+            border-color: rgba(37, 211, 102, 0.15);
+            transform: translateY(-4px);
         }
 
         .support-card .icon {
-            font-size: 40px;
+            font-size: 44px;
             margin-bottom: 12px;
+            display: block;
         }
 
         .support-card h3 {
@@ -369,43 +729,11 @@
             color: var(--muted);
             font-size: 14px;
             margin-bottom: 16px;
-        }
-
-        .btn-support {
-            padding: 10px 24px;
-            background: var(--primary);
-            color: var(--bg);
-            border: none;
-            border-radius: 10px;
-            font-weight: 600;
-            font-size: 14px;
-            cursor: pointer;
-            transition: all var(--transition);
-            text-decoration: none;
-            font-family: inherit;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .btn-support:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 24px rgba(37, 211, 102, 0.3);
-        }
-
-        .btn-support.outline {
-            background: transparent;
-            color: var(--text);
-            border: 1.5px solid var(--border);
-        }
-
-        .btn-support.outline:hover {
-            border-color: var(--primary);
-            background: rgba(37, 211, 102, 0.05);
+            line-height: 1.7;
         }
 
         .support-numbers {
-            margin-top: 16px;
+            margin-top: 12px;
             display: flex;
             flex-direction: column;
             gap: 8px;
@@ -415,9 +743,9 @@
             display: flex;
             align-items: center;
             gap: 12px;
-            padding: 10px 14px;
+            padding: 10px 16px;
             background: rgba(255,255,255,0.03);
-            border-radius: 10px;
+            border-radius: 12px;
             border: 1px solid var(--border);
             transition: all var(--transition);
             text-decoration: none;
@@ -426,11 +754,11 @@
 
         .support-number:hover {
             border-color: var(--primary);
-            background: rgba(37, 211, 102, 0.05);
+            background: rgba(37, 211, 102, 0.04);
         }
 
         .support-number .flag {
-            font-size: 24px;
+            font-size: 28px;
         }
 
         .support-number .info {
@@ -438,18 +766,18 @@
         }
 
         .support-number .info .name {
-            font-size: 13px;
+            font-size: 14px;
             font-weight: 600;
         }
 
         .support-number .info .phone {
-            font-size: 12px;
+            font-size: 13px;
             color: var(--muted);
         }
 
         .support-number .whatsapp-icon {
             color: var(--primary);
-            font-size: 20px;
+            font-size: 22px;
         }
 
         .empty-support {
@@ -458,48 +786,83 @@
             color: var(--muted);
             font-size: 14px;
             border: 1px dashed var(--border);
-            border-radius: 10px;
+            border-radius: 12px;
         }
 
-        /* ============ TEAM ============ */
+        .btn-support {
+            padding: 12px 32px;
+            background: linear-gradient(135deg, var(--primary), var(--primary-teal));
+            color: var(--bg);
+            border: none;
+            border-radius: 60px;
+            font-weight: 700;
+            font-size: 15px;
+            cursor: pointer;
+            transition: all var(--transition);
+            text-decoration: none;
+            font-family: inherit;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 4px 24px var(--primary-glow);
+        }
+
+        .btn-support:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 40px var(--primary-glow);
+        }
+
+        /* ============================================================
+           TEAM
+           ============================================================ */
         .team {
             padding: 40px 0 60px;
             text-align: center;
         }
 
         .team-card {
-            background: var(--card);
-            padding: 32px;
-            border-radius: var(--radius);
+            background: var(--bg-card);
+            padding: 36px 32px;
+            border-radius: var(--radius-xl);
             border: 1px solid var(--border);
-            max-width: 400px;
+            max-width: 480px;
             margin: 0 auto;
+            backdrop-filter: blur(10px);
+            transition: all var(--transition);
+        }
+
+        .team-card:hover {
+            border-color: rgba(37, 211, 102, 0.15);
+            transform: translateY(-4px);
         }
 
         .team-icon {
-            font-size: 48px;
+            font-size: 52px;
             margin-bottom: 8px;
         }
 
         .team-card h3 {
-            font-size: 18px;
+            font-size: 20px;
             font-weight: 700;
         }
 
         .team-card p {
             color: var(--muted);
             font-size: 14px;
+            line-height: 1.7;
         }
 
-        /* ============ FOOTER ============ */
+        /* ============================================================
+           FOOTER
+           ============================================================ */
         .footer {
-            padding: 32px 0 24px;
+            padding: 40px 0 24px;
             border-top: 1px solid var(--border);
             text-align: center;
         }
 
         .footer-logo {
-            font-size: 18px;
+            font-size: 20px;
             font-weight: 700;
             color: var(--text);
         }
@@ -522,330 +885,108 @@
             color: var(--muted);
         }
 
-        /* ============ CHAT BUTTON ============ */
-        .chat-button {
-            position: fixed;
-            bottom: 24px;
-            right: 24px;
-            width: 60px;
-            height: 60px;
-            background: var(--primary);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            box-shadow: 0 4px 20px rgba(37, 211, 102, 0.3);
-            transition: all var(--transition);
-            z-index: 1000;
-            border: none;
-            color: var(--bg);
-            font-size: 26px;
-        }
-
-        .chat-button:hover {
-            transform: scale(1.1);
-            box-shadow: 0 8px 30px rgba(37, 211, 102, 0.4);
-        }
-
-        .chat-button .badge {
-            position: absolute;
-            top: -4px;
-            right: -4px;
-            width: 22px;
-            height: 22px;
-            background: #DC2626;
-            border-radius: 50%;
-            font-size: 11px;
-            font-weight: 700;
-            display: none;
-            align-items: center;
-            justify-content: center;
-            color: white;
-        }
-
-        .chat-button .badge.show {
-            display: flex;
-        }
-
-        .chat-button .status-dot {
-            position: absolute;
-            bottom: 4px;
-            right: 4px;
-            width: 14px;
-            height: 14px;
-            border-radius: 50%;
-            border: 2px solid var(--bg);
-            background: var(--primary);
-        }
-
-        .chat-button .status-dot.offline {
-            background: #DC2626;
-        }
-
-        /* ============ CHAT WIDGET ============ */
-        .chat-widget {
-            position: fixed;
-            bottom: 96px;
-            right: 24px;
-            width: 380px;
-            max-width: calc(100vw - 48px);
-            height: 520px;
-            max-height: calc(100vh - 150px);
-            background: var(--card);
-            border-radius: var(--radius);
-            box-shadow: var(--shadow);
-            border: 1px solid var(--border);
-            display: none;
-            flex-direction: column;
-            z-index: 1000;
-            animation: slideUp 0.3s ease;
-            overflow: hidden;
-        }
-
-        .chat-widget.open {
-            display: flex;
-        }
-
-        @keyframes slideUp {
-            from { opacity: 0; transform: translateY(20px) scale(0.95); }
-            to { opacity: 1; transform: translateY(0) scale(1); }
-        }
-
-        .chat-header {
-            padding: 14px 20px;
-            background: var(--primary-dark);
-            color: white;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-shrink: 0;
-        }
-
-        .chat-header-info {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .chat-header-avatar {
-            width: 36px;
-            height: 36px;
-            background: rgba(255,255,255,0.15);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 16px;
-        }
-
-        .chat-header-title {
-            font-weight: 600;
-            font-size: 15px;
-        }
-
-        .chat-header-status {
-            font-size: 11px;
-            opacity: 0.8;
-        }
-
-        .chat-close {
-            background: none;
-            border: none;
-            color: white;
-            font-size: 20px;
-            cursor: pointer;
-            opacity: 0.7;
-            transition: opacity var(--transition);
-        }
-
-        .chat-close:hover {
-            opacity: 1;
-        }
-
-        .chat-messages {
-            flex: 1;
-            padding: 16px 20px;
-            overflow-y: auto;
-            background: rgba(255,255,255,0.02);
-        }
-
-        .chat-messages::-webkit-scrollbar {
-            width: 4px;
-        }
-
-        .chat-messages::-webkit-scrollbar-thumb {
-            background: var(--border);
-            border-radius: 4px;
-        }
-
-        .chat-message {
-            margin-bottom: 12px;
-            max-width: 85%;
-            padding: 10px 14px;
-            border-radius: 12px;
-            font-size: 14px;
-            line-height: 1.5;
-            word-wrap: break-word;
-            animation: fadeIn 0.2s ease;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(4px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .chat-message.user {
-            background: var(--primary);
-            color: var(--bg);
-            margin-left: auto;
-            border-bottom-right-radius: 4px;
-        }
-
-        .chat-message.admin {
-            background: var(--card-hover);
-            color: var(--text);
-            border: 1px solid var(--border);
-            border-bottom-left-radius: 4px;
-        }
-
-        .chat-message .msg-time {
-            font-size: 10px;
-            opacity: 0.6;
-            margin-top: 4px;
-            display: block;
-        }
-
-        .chat-message.user .msg-time {
-            color: rgba(0,0,0,0.5);
-        }
-
-        .chat-message .admin-name {
-            font-size: 11px;
-            font-weight: 600;
-            color: var(--primary);
-            margin-bottom: 2px;
-            display: block;
-        }
-
-        .chat-input-area {
-            padding: 12px 16px;
-            border-top: 1px solid var(--border);
-            display: flex;
-            gap: 10px;
-            background: var(--card);
-            flex-shrink: 0;
-        }
-
-        .chat-input-area input {
-            flex: 1;
-            padding: 10px 14px;
-            border: 1.5px solid var(--border);
-            border-radius: 10px;
-            font-size: 14px;
-            font-family: inherit;
-            background: var(--bg);
-            color: var(--text);
-            outline: none;
-            transition: border-color var(--transition);
-        }
-
-        .chat-input-area input:focus {
-            border-color: var(--primary);
-        }
-
-        .chat-input-area input::placeholder {
-            color: var(--muted);
-        }
-
-        .chat-input-area button {
-            padding: 10px 20px;
-            background: var(--primary);
-            color: var(--bg);
-            border: none;
-            border-radius: 10px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all var(--transition);
-            font-family: inherit;
-        }
-
-        .chat-input-area button:hover {
-            background: var(--primary-teal);
-            transform: scale(1.02);
-        }
-
-        .chat-input-area button:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-
-        /* ============ RESPONSIVE ============ */
-        @media (max-width: 900px) {
+        /* ============================================================
+           RESPONSIVE
+           ============================================================ */
+        @media (max-width: 992px) {
+            .hero h1 {
+                font-size: 44px;
+            }
             .support-grid {
                 grid-template-columns: 1fr;
             }
-
-            .hero h1 {
-                font-size: 36px;
-            }
-
             .stats-grid {
-                grid-template-columns: 1fr 1fr;
+                grid-template-columns: repeat(2, 1fr);
             }
         }
 
-        @media (max-width: 640px) {
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+                flex-direction: column;
+                position: absolute;
+                top: 72px;
+                left: 0;
+                right: 0;
+                background: rgba(10,10,10,0.95);
+                backdrop-filter: blur(24px);
+                padding: 24px;
+                border-bottom: 1px solid var(--border);
+                gap: 16px;
+            }
+            .nav-links.open {
+                display: flex;
+            }
+            .menu-toggle {
+                display: block;
+            }
             .hero h1 {
+                font-size: 32px;
+            }
+            .hero {
+                padding: 80px 0 40px;
+            }
+            .hero-features {
+                gap: 8px;
+            }
+            .hero-feature {
+                font-size: 12px;
+                padding: 6px 14px;
+            }
+            .stats-grid {
+                grid-template-columns: 1fr;
+                max-width: 300px;
+            }
+            .section-title {
                 font-size: 28px;
             }
-
-            .hero-features {
-                flex-direction: column;
-                align-items: center;
-            }
-
             .features-grid {
                 grid-template-columns: 1fr;
             }
-
-            .stats-grid {
-                grid-template-columns: 1fr;
+            .support-card {
+                padding: 24px 20px;
             }
-
-            .chat-widget {
-                width: calc(100vw - 32px);
-                right: 16px;
-                bottom: 84px;
-                height: 460px;
+            .btn-primary, .btn-secondary {
+                padding: 12px 28px;
+                font-size: 14px;
             }
-
-            .header {
-                flex-direction: column;
-                gap: 12px;
+            .btn-pair {
+                padding: 8px 20px;
+                font-size: 13px;
             }
-
             .logo {
                 font-size: 20px;
             }
-
-            .support-card {
-                padding: 24px;
+            .logo-icon {
+                width: 32px;
+                height: 32px;
+                font-size: 14px;
             }
         }
 
-        @media (max-width: 380px) {
-            .chat-widget {
-                height: 400px;
-                bottom: 76px;
+        @media (max-width: 480px) {
+            .hero h1 {
+                font-size: 26px;
             }
-
-            .chat-input-area {
+            .hero p {
+                font-size: 15px;
+            }
+            .hero-cta {
                 flex-direction: column;
+                align-items: center;
             }
-
-            .chat-input-area button {
+            .btn-primary, .btn-secondary {
                 width: 100%;
+                justify-content: center;
+            }
+            .support-card {
+                padding: 20px 16px;
+            }
+            .support-number {
+                padding: 8px 12px;
+            }
+            .support-number .flag {
+                font-size: 22px;
             }
         }
     </style>
@@ -854,78 +995,130 @@
 
     <!-- ============ LOADER ============ -->
     <div class="loader" id="loader">
-        <div class="loader-logo">⚡</div>
-        <div style="font-weight: 700; font-size: 20px; margin-top: 8px; color: var(--text);">BLAZE-XMD</div>
+        <div class="loader-ring"></div>
+        <div class="loader-logo">BLAZE-XMD</div>
+        <div class="loader-sub">Loading Experience...</div>
         <div class="loader-bar"><div class="loader-bar-fill"></div></div>
     </div>
 
+    <!-- ============ BACKGROUND GLOW ============ -->
+    <div class="bg-glow">
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+        <div class="orb orb-3"></div>
+        <div class="orb orb-4"></div>
+    </div>
+
+    <!-- ============ PARTICLES ============ -->
+    <div class="particles">
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+    </div>
+
     <!-- ============ HEADER ============ -->
-    <header class="header">
-        <div class="container" style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
-            <a href="/" style="text-decoration: none;">
-                <div class="logo">
-                    <span class="logo-icon">⚡</span>BLAZE<span>XMD</span>
-                </div>
+    <header class="header" id="header">
+        <div class="container" style="display:flex; justify-content:space-between; align-items:center; width:100%;">
+            <a href="/" class="logo">
+                <span class="logo-icon">⚡</span>
+                BLAZE<span>XMD</span>
             </a>
-            <a href="#" id="pairBtn" class="btn-pair" target="_blank">
-                🔑 Pair Device
-            </a>
+            <nav class="nav-links" id="navLinks">
+                <a href="/">Home</a>
+                <a href="#features">Features</a>
+                <a href="#support">Support</a>
+                <a href="#team">Team</a>
+                <a href="/support" class="btn-pair" style="padding:8px 20px; font-size:13px;">
+                    <i class="fas fa-headset"></i> Support
+                </a>
+            </nav>
+            <button class="menu-toggle" id="menuToggle">
+                <i class="fas fa-bars"></i>
+            </button>
         </div>
     </header>
 
     <!-- ============ HERO ============ -->
-    <section class="hero">
+    <section class="hero" id="home">
         <div class="container">
-            <div class="hero-badge">⚡ WhatsApp Bot Infrastructure</div>
-            <h1>Power Up Your <span>WhatsApp</span> Experience</h1>
-            <p>The ultimate WhatsApp bot with powerful features to automate, manage, and enhance your messaging.</p>
+            <div class="hero-badge">
+                <i class="fas fa-bolt" style="margin-right:4px;"></i> WhatsApp Bot Infrastructure
+            </div>
+            <h1>
+                Power Up Your <br /><span class="gradient-text">WhatsApp Experience</span>
+            </h1>
+            <p>
+                The ultimate WhatsApp bot with powerful features to automate, manage, 
+                and enhance your messaging. Connect, control, and conquer.
+            </p>
             <div class="hero-features">
                 <span class="hero-feature"><span class="dot"></span> Auto-View Status</span>
                 <span class="hero-feature"><span class="dot"></span> Group Management</span>
                 <span class="hero-feature"><span class="dot"></span> Auto-Reply Messages</span>
                 <span class="hero-feature"><span class="dot"></span> Anti-Once View</span>
             </div>
-            <a href="#" id="pairBtn2" class="btn-pair" style="margin-top: 32px;" target="_blank">
-                🔑 Pair Your Device
-            </a>
+            <div class="hero-cta">
+                <a href="#" id="pairBtn" class="btn-primary" target="_blank">
+                    <i class="fas fa-key"></i> Pair Your Device
+                </a>
+                <a href="/support" class="btn-secondary">
+                    <i class="fas fa-headset"></i> Get Support
+                </a>
+            </div>
         </div>
     </section>
 
     <!-- ============ FEATURES ============ -->
-    <section class="features">
+    <section class="features" id="features">
         <div class="container">
-            <h2 class="section-title">⚡ Powerful Features</h2>
-            <p class="section-subtitle">Everything you need to supercharge your WhatsApp experience.</p>
+            <div style="text-align:center;">
+                <span class="section-badge"><i class="fas fa-star" style="margin-right:4px;"></i> Features</span>
+                <h2 class="section-title">⚡ Powerful <span class="gradient-text">Features</span></h2>
+                <p class="section-subtitle">Everything you need to supercharge your WhatsApp experience.</p>
+            </div>
             <div class="features-grid">
                 <div class="feature-card">
-                    <div class="feature-icon">👁️</div>
+                    <span class="feature-icon">👁️</span>
                     <h3>Auto-View Status</h3>
                     <p>Automatically view status updates from your contacts. Never miss a story again!</p>
+                    <span class="feature-tag">Always On</span>
                 </div>
                 <div class="feature-card">
-                    <div class="feature-icon">📊</div>
+                    <span class="feature-icon">📊</span>
                     <h3>Group Management</h3>
                     <p>Full control over your WhatsApp groups. Manage members, settings, and interactions effortlessly.</p>
+                    <span class="feature-tag">Pro Control</span>
                 </div>
                 <div class="feature-card">
-                    <div class="feature-icon">💬</div>
+                    <span class="feature-icon">💬</span>
                     <h3>Auto-Reply Messages</h3>
                     <p>Set up automatic replies for messages. Never leave anyone waiting again!</p>
+                    <span class="feature-tag">24/7 Active</span>
                 </div>
                 <div class="feature-card">
-                    <div class="feature-icon">🔓</div>
+                    <span class="feature-icon">🔓</span>
                     <h3>Anti-Once View</h3>
                     <p>Open view once photos and videos multiple times. No more "This media has expired" errors!</p>
+                    <span class="feature-tag">Unlimited</span>
                 </div>
                 <div class="feature-card">
-                    <div class="feature-icon">📸</div>
+                    <span class="feature-icon">📸</span>
                     <h3>View Once Photos</h3>
                     <p>Open and view once photos sent to you. Never worry about missing important photos!</p>
+                    <span class="feature-tag">Secure</span>
                 </div>
                 <div class="feature-card">
-                    <div class="feature-icon">🎥</div>
+                    <span class="feature-icon">🎥</span>
                     <h3>View Once Videos</h3>
                     <p>Open and view once videos sent to you. Never miss important videos again!</p>
+                    <span class="feature-tag">Reliable</span>
                 </div>
             </div>
         </div>
@@ -936,15 +1129,15 @@
         <div class="container">
             <div class="stats-grid">
                 <div class="stat-card">
-                    <div class="stat-number" id="visitorsCount">4,231</div>
+                    <div class="stat-number">4,231</div>
                     <div class="stat-label">👥 Visitors Today</div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-number" id="successCount">89</div>
+                    <div class="stat-number">89</div>
                     <div class="stat-label">✅ Successful Pairings</div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-number" id="onlineCount">12</div>
+                    <div class="stat-number">12</div>
                     <div class="stat-label">⏳ Currently Online</div>
                 </div>
             </div>
@@ -952,34 +1145,37 @@
     </section>
 
     <!-- ============ SUPPORT ============ -->
-    <section class="support-section">
+    <section class="support-section" id="support">
         <div class="container">
-            <h2 class="section-title">📞 Support</h2>
-            <p class="section-subtitle">We're here to help you 24/7.</p>
+            <div style="text-align:center;">
+                <span class="section-badge"><i class="fas fa-headset" style="margin-right:4px;"></i> Support</span>
+                <h2 class="section-title">📞 <span class="gradient-text">Get Help</span></h2>
+                <p class="section-subtitle">We're here to help you 24/7. Choose your preferred support channel.</p>
+            </div>
             <div class="support-grid">
                 <!-- Live Chat -->
-                <div class="support-card" id="liveChatCard">
-                    <div class="icon">💬</div>
+                <div class="support-card">
+                    <span class="icon">💬</span>
                     <h3>Live Chat Support</h3>
                     <p>Chat with our support team in real-time. Get instant help with any issue.</p>
                     <a href="/support" class="btn-support">
-                        💬 Start Chat
+                        <i class="fas fa-headset"></i> Start Chat
                     </a>
-                    <div style="margin-top: 12px; display: flex; align-items: center; gap: 8px;">
-                        <span id="statusDot" style="display: inline-block; width: 8px; height: 8px; background: var(--primary); border-radius: 50%;"></span>
-                        <span id="statusText" style="font-size: 13px; color: var(--muted);">Online</span>
+                    <div style="margin-top:12px; display:flex; align-items:center; gap:8px; font-size:13px; color:var(--muted);">
+                        <span style="display:inline-block; width:8px; height:8px; background:var(--success); border-radius:50%;"></span>
+                        <span id="statusText">Online - Replies in minutes</span>
                     </div>
                 </div>
 
                 <!-- Support Numbers -->
                 <div class="support-card">
-                    <div class="icon">📱</div>
+                    <span class="icon">📱</span>
                     <h3>Support Numbers</h3>
                     <p>Contact us directly via WhatsApp for immediate assistance.</p>
                     <div class="support-numbers" id="supportNumbers">
-                        <!-- Dynamically loaded from API -->
+                        <!-- Dynamically loaded -->
                     </div>
-                    <div id="emptySupport" class="empty-support" style="display: none;">
+                    <div id="emptySupport" class="empty-support" style="display:none;">
                         📭 No support numbers added yet
                     </div>
                 </div>
@@ -988,14 +1184,17 @@
     </section>
 
     <!-- ============ TEAM ============ -->
-    <section class="team">
+    <section class="team" id="team">
         <div class="container">
-            <h2 class="section-title">🔹 Built by BLAZE-XMD Team</h2>
-            <p class="section-subtitle">Dedicated developers committed to providing the best WhatsApp bot experience.</p>
+            <div style="text-align:center;">
+                <span class="section-badge"><i class="fas fa-users" style="margin-right:4px;"></i> Team</span>
+                <h2 class="section-title">🔹 Built by <span class="gradient-text">BLAZE-XMD Team</span></h2>
+                <p class="section-subtitle">Dedicated developers committed to providing the best WhatsApp bot experience.</p>
+            </div>
             <div class="team-card">
                 <div class="team-icon">👨‍💻</div>
                 <h3>BLAZE-XMD Team</h3>
-                <p>Passionate about building innovative WhatsApp solutions.</p>
+                <p>Passionate about building innovative WhatsApp solutions that empower users worldwide.</p>
             </div>
         </div>
     </section>
@@ -1011,84 +1210,64 @@
         </div>
     </footer>
 
-    <!-- ============ CHAT BUTTON ============ -->
-    <button class="chat-button" id="chatButton">
-        💬
-        <span class="badge" id="chatBadge">0</span>
-        <span class="status-dot" id="statusDotChat"></span>
-    </button>
-
-    <!-- ============ CHAT WIDGET ============ -->
-    <div class="chat-widget" id="chatWidget">
-        <div class="chat-header">
-            <div class="chat-header-info">
-                <div class="chat-header-avatar">💬</div>
-                <div>
-                    <div class="chat-header-title">Support Team</div>
-                    <div class="chat-header-status" id="chatStatusText">🟢 Online</div>
-                </div>
-            </div>
-            <button class="chat-close" id="chatClose">✕</button>
-        </div>
-        <div class="chat-messages" id="chatMessages">
-            <!-- Messages render here -->
-        </div>
-        <div class="chat-input-area">
-            <input type="text" id="chatInput" placeholder="Type a message..." />
-            <button id="chatSendBtn">Send</button>
-        </div>
-    </div>
-
-    <!-- ============ SCRIPT ============ -->
-    <script src="/socket.io/socket.io.js"></script>
     <script>
-        // ============ CONFIG ============
-        const PAIR_SITE_URL = 'https://blaze.zone.id';
-
-        // ============ DOM REFS ============
-        const loader = document.getElementById('loader');
-        const chatButton = document.getElementById('chatButton');
-        const chatWidget = document.getElementById('chatWidget');
-        const chatClose = document.getElementById('chatClose');
-        const chatInput = document.getElementById('chatInput');
-        const chatSendBtn = document.getElementById('chatSendBtn');
-        const chatMessages = document.getElementById('chatMessages');
-        const chatBadge = document.getElementById('chatBadge');
-        const statusDot = document.getElementById('statusDot');
-        const statusText = document.getElementById('statusText');
-        const statusDotChat = document.getElementById('statusDotChat');
-        const chatStatusText = document.getElementById('chatStatusText');
-        const supportNumbers = document.getElementById('supportNumbers');
-        const emptySupport = document.getElementById('emptySupport');
-
         // ============ LOADER ============
         window.addEventListener('load', () => {
             setTimeout(() => {
-                loader.classList.add('hidden');
-            }, 1800);
+                document.getElementById('loader').classList.add('hidden');
+            }, 2200);
         });
 
-        // ============ PAIR BUTTONS ============
-        document.querySelectorAll('#pairBtn, #pairBtn2').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                e.preventDefault();
-                window.open(PAIR_SITE_URL, '_blank');
-            });
+        // ============ MOBILE MENU ============
+        document.getElementById('menuToggle').addEventListener('click', function() {
+            document.getElementById('navLinks').classList.toggle('open');
         });
 
-        // ============ SOCKET.IO ============
-        const socket = io();
+        // ============ HEADER SCROLL ============
+        window.addEventListener('scroll', function() {
+            const header = document.getElementById('header');
+            if (window.scrollY > 50) {
+                header.classList.add('scrolled');
+            } else {
+                header.classList.remove('scrolled');
+            }
+        });
 
-        // Generate visitor ID
-        let visitorId = localStorage.getItem('visitorId');
-        if (!visitorId) {
-            visitorId = 'visitor_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6);
-            localStorage.setItem('visitorId', visitorId);
+        // ============ PAIR BUTTON ============
+        document.getElementById('pairBtn').addEventListener('click', function(e) {
+            e.preventDefault();
+            window.open('https://blaze.zone.id', '_blank');
+        });
+
+        // ============ FETCH SUPPORT NUMBERS ============
+        async function fetchSupportNumbers() {
+            try {
+                const res = await fetch('/api/support');
+                const data = await res.json();
+                const container = document.getElementById('supportNumbers');
+                const empty = document.getElementById('emptySupport');
+                
+                if (data && data.length > 0) {
+                    container.innerHTML = data.map(s => `
+                        <a href="https://wa.me/${s.phone}" target="_blank" class="support-number">
+                            <span class="flag">${s.countryFlag}</span>
+                            <div class="info">
+                                <div class="name">${s.name}</div>
+                                <div class="phone">${s.countryCode} ${s.phone}</div>
+                            </div>
+                            <span class="whatsapp-icon"><i class="fab fa-whatsapp"></i></span>
+                        </a>
+                    `).join('');
+                    container.style.display = 'flex';
+                    empty.style.display = 'none';
+                } else {
+                    container.style.display = 'none';
+                    empty.style.display = 'block';
+                }
+            } catch (error) {
+                console.error('Error fetching support numbers:', error);
+            }
         }
-
-        let visitorName = 'Guest';
-        let adminName = 'Support Team';
-        let isOnline = true;
 
         // ============ FETCH SETTINGS ============
         async function fetchSettings() {
@@ -1096,156 +1275,26 @@
                 const res = await fetch('/api/settings');
                 const data = await res.json();
                 if (data) {
-                    isOnline = data.isOnline !== undefined ? data.isOnline : true;
-                    adminName = data.adminName || 'Support Team';
-                    updateOnlineStatus(isOnline);
+                    const isOnline = data.isOnline !== undefined ? data.isOnline : true;
+                    const statusText = document.getElementById('statusText');
+                    if (isOnline) {
+                        statusText.textContent = 'Online - Replies in minutes';
+                        statusText.style.color = 'var(--success)';
+                    } else {
+                        statusText.textContent = 'Offline - We\'ll reply within 24h';
+                        statusText.style.color = 'var(--danger)';
+                    }
                 }
             } catch (error) {
                 console.error('Error fetching settings:', error);
             }
         }
 
-        function updateOnlineStatus(online) {
-            const status = online ? '🟢 Online' : '🔴 Offline';
-            statusText.textContent = status;
-            chatStatusText.textContent = status;
-            statusDot.style.background = online ? 'var(--primary)' : '#DC2626';
-            statusDotChat.style.background = online ? 'var(--primary)' : '#DC2626';
-        }
-
-        // ============ FETCH SUPPORT NUMBERS ============
-        async function fetchSupportNumbers() {
-            try {
-                const res = await fetch('/api/support');
-                const data = await res.json();
-                if (data && data.length > 0) {
-                    supportNumbers.innerHTML = data.map(s => `
-                        <a href="https://wa.me/${s.phone}" target="_blank" class="support-number">
-                            <span class="flag">${s.countryFlag}</span>
-                            <div class="info">
-                                <div class="name">${s.name}</div>
-                                <div class="phone">${s.countryCode} ${s.phone}</div>
-                            </div>
-                            <span class="whatsapp-icon">💬</span>
-                        </a>
-                    `).join('');
-                    supportNumbers.style.display = 'flex';
-                    emptySupport.style.display = 'none';
-                } else {
-                    supportNumbers.style.display = 'none';
-                    emptySupport.style.display = 'block';
-                }
-            } catch (error) {
-                console.error('Error fetching support numbers:', error);
-                supportNumbers.style.display = 'none';
-                emptySupport.style.display = 'block';
-            }
-        }
-
-        // ============ CHAT FUNCTIONS ============
-        function openChat() {
-            chatWidget.classList.add('open');
-            chatBadge.classList.remove('show');
-            chatBadge.textContent = '0';
-            chatInput.focus();
-            scrollToBottom();
-        }
-
-        function closeChat() {
-            chatWidget.classList.remove('open');
-        }
-
-        function scrollToBottom() {
-            setTimeout(() => {
-                chatMessages.scrollTop = chatMessages.scrollHeight;
-            }, 50);
-        }
-
-        function addMessage(message, isAdmin = false, adminNameText = '') {
-            const div = document.createElement('div');
-            div.className = `chat-message ${isAdmin ? 'admin' : 'user'}`;
-            
-            let html = '';
-            if (isAdmin && adminNameText) {
-                html += `<span class="admin-name">${adminNameText}</span>`;
-            }
-            html += message;
-            html += `<span class="msg-time">${new Date().toLocaleTimeString()}</span>`;
-            div.innerHTML = html;
-            chatMessages.appendChild(div);
-            scrollToBottom();
-        }
-
-        // ============ SEND MESSAGE ============
-        async function sendMessage() {
-            const message = chatInput.value.trim();
-            if (!message) return;
-            if (!isOnline) {
-                addMessage('⚠️ Support is currently offline. Please try again later.', true, 'System');
-                chatInput.value = '';
-                return;
-            }
-
-            chatSendBtn.disabled = true;
-            chatSendBtn.textContent = 'Sending...';
-
-            addMessage(message, false);
-
-            socket.emit('visitor-message', {
-                visitorId,
-                name: visitorName,
-                message
-            });
-
-            chatInput.value = '';
-            chatSendBtn.disabled = false;
-            chatSendBtn.textContent = 'Send';
-        }
-
-        // ============ SOCKET EVENTS ============
-        socket.on('connect', () => {
-            console.log('✅ Socket connected');
-            socket.emit('join-room', visitorId);
-        });
-
-        socket.on('admin-reply', (data) => {
-            addMessage(data.message, true, data.adminName);
-            if (!chatWidget.classList.contains('open')) {
-                chatBadge.textContent = parseInt(chatBadge.textContent) + 1;
-                chatBadge.classList.add('show');
-            }
-        });
-
-        socket.on('unread-update', (data) => {
-            if (!chatWidget.classList.contains('open')) {
-                chatBadge.textContent = data.unread || 0;
-                if (data.unread > 0) {
-                    chatBadge.classList.add('show');
-                } else {
-                    chatBadge.classList.remove('show');
-                }
-            }
-        });
-
-        // ============ EVENT LISTENERS ============
-        chatButton.addEventListener('click', openChat);
-        chatClose.addEventListener('click', closeChat);
-
-        chatSendBtn.addEventListener('click', sendMessage);
-        chatInput.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter') sendMessage();
-        });
-
         // ============ INIT ============
-        fetchSettings();
         fetchSupportNumbers();
-
-        setTimeout(() => {
-            addMessage('👋 Hello! How can I help you today?', true, 'Support Team');
-        }, 500);
+        fetchSettings();
 
         console.log('🚀 BLAZE-XMD Landing Page loaded');
-        console.log('👤 Visitor ID:', visitorId);
     </script>
 </body>
 </html>
