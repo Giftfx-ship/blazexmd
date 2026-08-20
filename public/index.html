@@ -1,0 +1,1196 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blaze XMD - Professional WhatsApp Bot</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #6C63FF;
+            --primary-dark: #5A52D5;
+            --secondary: #FF6B6B;
+            --accent: #00D2FF;
+            --success: #00FF88;
+            --warning: #FFD93D;
+            --dark-bg: #0A0A1A;
+            --dark-card: #12122A;
+            --dark-text: #FFFFFF;
+            --dark-muted: #8888AA;
+            --light-bg: #F5F5FF;
+            --light-card: #FFFFFF;
+            --light-text: #1A1A2E;
+            --light-muted: #666688;
+            --glass: rgba(255, 255, 255, 0.05);
+            --glass-border: rgba(108, 99, 255, 0.15);
+            --shadow: 0 8px 32px rgba(108, 99, 255, 0.15);
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        [data-theme="light"] {
+            --bg: var(--light-bg);
+            --card: var(--light-card);
+            --text: var(--light-text);
+            --muted: var(--light-muted);
+            --glass: rgba(0, 0, 0, 0.03);
+            --glass-border: rgba(0, 0, 0, 0.08);
+            --shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+        }
+
+        [data-theme="dark"] {
+            --bg: var(--dark-bg);
+            --card: var(--dark-card);
+            --text: var(--dark-text);
+            --muted: var(--dark-muted);
+            --glass: rgba(255, 255, 255, 0.05);
+            --glass-border: rgba(108, 99, 255, 0.15);
+            --shadow: 0 8px 32px rgba(108, 99, 255, 0.15);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            transition: var(--transition);
+            overflow-x: hidden;
+        }
+
+        /* ===== ANIMATED BACKGROUND ===== */
+        .bg-animation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            pointer-events: none;
+            overflow: hidden;
+        }
+
+        .orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(100px);
+            opacity: 0.2;
+            animation: floatOrb 25s infinite alternate ease-in-out;
+        }
+
+        .orb:nth-child(1) {
+            width: 600px;
+            height: 600px;
+            background: var(--primary);
+            top: -10%;
+            left: -10%;
+            animation-delay: 0s;
+        }
+
+        .orb:nth-child(2) {
+            width: 500px;
+            height: 500px;
+            background: var(--secondary);
+            bottom: -10%;
+            right: -10%;
+            animation-delay: -8s;
+        }
+
+        .orb:nth-child(3) {
+            width: 400px;
+            height: 400px;
+            background: var(--accent);
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            animation-delay: -16s;
+        }
+
+        @keyframes floatOrb {
+            0% { transform: translate(0, 0) scale(1); }
+            33% { transform: translate(100px, -100px) scale(1.3); }
+            66% { transform: translate(-100px, 100px) scale(0.7); }
+            100% { transform: translate(50px, -50px) scale(1.1); }
+        }
+
+        /* ===== PARTICLES ===== */
+        .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        .particle {
+            position: absolute;
+            width: 3px;
+            height: 3px;
+            background: var(--primary);
+            border-radius: 50%;
+            animation: particleFloat 20s infinite linear;
+            opacity: 0.3;
+        }
+
+        @keyframes particleFloat {
+            0% { transform: translateY(100vh) rotate(0deg); opacity: 0; }
+            10% { opacity: 0.3; }
+            90% { opacity: 0.3; }
+            100% { transform: translateY(-10vh) rotate(720deg); opacity: 0; }
+        }
+
+        /* ===== BLAZE ANIMATION ===== */
+        .blaze-animation {
+            display: inline-block;
+            animation: blazeGlow 3s infinite ease-in-out;
+        }
+
+        @keyframes blazeGlow {
+            0%, 100% { text-shadow: 0 0 20px rgba(108, 99, 255, 0.3); }
+            50% { text-shadow: 0 0 40px rgba(108, 99, 255, 0.8), 0 0 80px rgba(108, 99, 255, 0.4); }
+        }
+
+        /* ===== NAVBAR ===== */
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            padding: 12px 5%;
+            background: rgba(10, 10, 26, 0.85);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--glass-border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: var(--transition);
+            animation: slideDown 0.8s ease;
+        }
+
+        @keyframes slideDown {
+            from { transform: translateY(-100%); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        [data-theme="light"] .navbar {
+            background: rgba(255, 255, 255, 0.85);
+        }
+
+        .logo {
+            font-size: 26px;
+            font-weight: 900;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: var(--text);
+        }
+
+        .logo i {
+            font-size: 30px;
+            color: var(--primary);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        .logo .blaze {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 25px;
+            align-items: center;
+        }
+
+        .nav-links a {
+            color: var(--text);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 14px;
+            transition: var(--transition);
+            position: relative;
+        }
+
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: var(--primary);
+            transition: var(--transition);
+        }
+
+        .nav-links a:hover::after {
+            width: 100%;
+        }
+
+        .nav-links a:hover {
+            color: var(--primary);
+        }
+
+        .theme-toggle {
+            background: var(--glass);
+            border: 1px solid var(--glass-border);
+            color: var(--text);
+            padding: 8px 14px;
+            border-radius: 50px;
+            cursor: pointer;
+            font-size: 18px;
+            transition: var(--transition);
+        }
+
+        .theme-toggle:hover {
+            background: var(--primary);
+            color: white;
+            transform: rotate(30deg);
+        }
+
+        .btn-nav {
+            padding: 8px 20px;
+            border-radius: 50px;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white !important;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+            transition: var(--transition);
+            text-decoration: none;
+        }
+
+        .btn-nav:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 20px rgba(108, 99, 255, 0.4);
+        }
+
+        /* ===== HERO ===== */
+        .hero {
+            position: relative;
+            z-index: 1;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 120px 5% 80px;
+        }
+
+        .hero-content {
+            max-width: 900px;
+        }
+
+        .hero-badge {
+            display: inline-block;
+            padding: 8px 24px;
+            background: var(--glass);
+            border: 1px solid var(--glass-border);
+            border-radius: 50px;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--primary);
+            margin-bottom: 30px;
+            animation: fadeInDown 0.8s;
+        }
+
+        .hero-badge i {
+            margin-right: 8px;
+            animation: rotateIcon 4s infinite linear;
+        }
+
+        @keyframes rotateIcon {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .hero h1 {
+            font-size: 72px;
+            font-weight: 900;
+            line-height: 1.1;
+            margin-bottom: 20px;
+            animation: fadeInUp 0.8s;
+        }
+
+        .hero h1 .gradient-text {
+            background: linear-gradient(135deg, var(--primary), var(--secondary), var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: shimmer 4s infinite;
+            background-size: 300% 300%;
+        }
+
+        @keyframes shimmer {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+
+        .hero p {
+            font-size: 20px;
+            color: var(--muted);
+            margin-bottom: 40px;
+            animation: fadeInUp 1s;
+            max-width: 700px;
+            margin-left: auto;
+            margin-right: auto;
+            line-height: 1.8;
+        }
+
+        .hero-buttons {
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+            flex-wrap: wrap;
+            animation: fadeInUp 1.2s;
+        }
+
+        .btn {
+            padding: 14px 36px;
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 15px;
+            text-decoration: none;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            border: none;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: 0.5s;
+        }
+
+        .btn:hover::before {
+            left: 100%;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            box-shadow: 0 4px 20px rgba(108, 99, 255, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 30px rgba(108, 99, 255, 0.5);
+        }
+
+        .btn-secondary {
+            background: var(--glass);
+            color: var(--text);
+            border: 2px solid var(--glass-border);
+        }
+
+        .btn-secondary:hover {
+            border-color: var(--primary);
+            background: var(--primary);
+            color: white;
+            transform: translateY(-3px);
+        }
+
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translateY(-30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* ===== STATS ===== */
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 30px;
+            margin-top: 60px;
+            padding: 35px;
+            background: var(--glass);
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--glass-border);
+            animation: fadeInUp 1.4s;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 38px;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .stat-label {
+            font-size: 13px;
+            color: var(--muted);
+            margin-top: 5px;
+        }
+
+        /* ===== FEATURES ===== */
+        .features {
+            position: relative;
+            z-index: 1;
+            padding: 80px 5%;
+        }
+
+        .section-title {
+            text-align: center;
+            font-size: 44px;
+            font-weight: 700;
+            margin-bottom: 15px;
+            animation: fadeInUp 0.8s;
+        }
+
+        .section-subtitle {
+            text-align: center;
+            color: var(--muted);
+            font-size: 18px;
+            margin-bottom: 50px;
+            animation: fadeInUp 1s;
+        }
+
+        .section-title span {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 25px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .feature-card {
+            padding: 35px;
+            background: var(--card);
+            border-radius: 20px;
+            border: 1px solid var(--glass-border);
+            transition: var(--transition);
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            animation: fadeInUp 0.8s ease forwards;
+            opacity: 0;
+        }
+
+        .feature-card:nth-child(1) { animation-delay: 0.1s; }
+        .feature-card:nth-child(2) { animation-delay: 0.2s; }
+        .feature-card:nth-child(3) { animation-delay: 0.3s; }
+        .feature-card:nth-child(4) { animation-delay: 0.4s; }
+        .feature-card:nth-child(5) { animation-delay: 0.5s; }
+        .feature-card:nth-child(6) { animation-delay: 0.6s; }
+        .feature-card:nth-child(7) { animation-delay: 0.7s; }
+
+        .feature-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            transform: scaleX(0);
+            transition: var(--transition);
+        }
+
+        .feature-card:hover::before {
+            transform: scaleX(1);
+        }
+
+        .feature-card:hover {
+            transform: translateY(-10px);
+            box-shadow: var(--shadow);
+        }
+
+        .feature-icon {
+            font-size: 42px;
+            margin-bottom: 15px;
+            display: inline-block;
+        }
+
+        .feature-card h3 {
+            font-size: 20px;
+            margin-bottom: 10px;
+        }
+
+        .feature-card p {
+            color: var(--muted);
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .feature-badge {
+            display: inline-block;
+            padding: 2px 12px;
+            background: var(--primary);
+            color: white;
+            border-radius: 50px;
+            font-size: 10px;
+            font-weight: 600;
+            margin-top: 10px;
+        }
+
+        /* ===== SUPPORT SECTION ===== */
+        .support-section {
+            position: relative;
+            z-index: 1;
+            padding: 80px 5%;
+            background: var(--glass);
+        }
+
+        .support-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .support-card {
+            padding: 25px;
+            background: var(--card);
+            border-radius: 15px;
+            border: 1px solid var(--glass-border);
+            text-align: center;
+            transition: var(--transition);
+            animation: fadeInUp 0.8s ease forwards;
+            opacity: 0;
+        }
+
+        .support-card:nth-child(1) { animation-delay: 0.1s; }
+        .support-card:nth-child(2) { animation-delay: 0.2s; }
+        .support-card:nth-child(3) { animation-delay: 0.3s; }
+        .support-card:nth-child(4) { animation-delay: 0.4s; }
+        .support-card:nth-child(5) { animation-delay: 0.5s; }
+
+        .support-card:hover {
+            transform: scale(1.05);
+            box-shadow: var(--shadow);
+        }
+
+        .support-card .flag {
+            font-size: 32px;
+            display: block;
+            margin-bottom: 8px;
+        }
+
+        .support-card .name {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .support-card .country {
+            font-size: 14px;
+            color: var(--muted);
+            margin-bottom: 8px;
+        }
+
+        .support-card .number {
+            font-size: 18px;
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        .support-card .whatsapp-link {
+            display: inline-block;
+            margin-top: 10px;
+            padding: 6px 16px;
+            background: #25D366;
+            color: white;
+            border-radius: 50px;
+            text-decoration: none;
+            font-size: 12px;
+            font-weight: 600;
+            transition: var(--transition);
+        }
+
+        .support-card .whatsapp-link:hover {
+            transform: scale(1.05);
+        }
+
+        .no-support {
+            text-align: center;
+            color: var(--muted);
+            padding: 40px;
+            font-size: 16px;
+        }
+
+        /* ===== CHAT WIDGET ===== */
+        .chat-widget {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            z-index: 999;
+        }
+
+        .chat-toggle {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border: none;
+            color: white;
+            font-size: 30px;
+            cursor: pointer;
+            box-shadow: 0 4px 20px rgba(108, 99, 255, 0.4);
+            transition: var(--transition);
+            position: relative;
+            animation: fadeInUp 0.8s ease;
+        }
+
+        .chat-toggle:hover {
+            transform: scale(1.1);
+        }
+
+        .chat-toggle .online-dot {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: var(--success);
+            border: 3px solid var(--bg);
+            animation: blink 1.5s infinite;
+        }
+
+        .chat-toggle .online-dot.offline {
+            background: var(--secondary);
+            animation: none;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+
+        .chat-box {
+            position: absolute;
+            bottom: 85px;
+            right: 0;
+            width: 380px;
+            height: 520px;
+            background: var(--card);
+            border-radius: 20px;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--glass-border);
+            display: none;
+            flex-direction: column;
+            overflow: hidden;
+            animation: slideUp 0.3s ease;
+        }
+
+        .chat-box.active {
+            display: flex;
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .chat-header {
+            padding: 18px 20px;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .chat-header h3 {
+            font-size: 15px;
+        }
+
+        .chat-header .status {
+            font-size: 11px;
+            opacity: 0.8;
+        }
+
+        .chat-messages {
+            flex: 1;
+            padding: 15px 20px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .chat-message {
+            padding: 10px 14px;
+            border-radius: 12px;
+            max-width: 80%;
+            word-wrap: break-word;
+            font-size: 14px;
+            animation: fadeInUp 0.3s ease;
+        }
+
+        .chat-message.user {
+            background: var(--primary);
+            color: white;
+            align-self: flex-end;
+        }
+
+        .chat-message.admin {
+            background: var(--glass);
+            color: var(--text);
+            align-self: flex-start;
+            border: 1px solid var(--glass-border);
+        }
+
+        .chat-message .time {
+            font-size: 9px;
+            opacity: 0.6;
+            margin-top: 4px;
+            display: block;
+        }
+
+        .chat-input {
+            padding: 15px 20px;
+            display: flex;
+            gap: 10px;
+            border-top: 1px solid var(--glass-border);
+        }
+
+        .chat-input input {
+            flex: 1;
+            padding: 10px 14px;
+            border-radius: 10px;
+            border: 1px solid var(--glass-border);
+            background: var(--bg);
+            color: var(--text);
+            font-size: 14px;
+        }
+
+        .chat-input input:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .chat-input button {
+            padding: 10px 18px;
+            border-radius: 10px;
+            border: none;
+            background: var(--primary);
+            color: white;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .chat-input button:hover {
+            background: var(--primary-dark);
+        }
+
+        /* ===== FOOTER ===== */
+        .footer {
+            position: relative;
+            z-index: 1;
+            padding: 40px 5% 20px;
+            border-top: 1px solid var(--glass-border);
+            text-align: center;
+        }
+
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .footer-brand {
+            font-size: 24px;
+            font-weight: 800;
+            margin-bottom: 10px;
+        }
+
+        .footer-brand .blaze {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .footer p {
+            color: var(--muted);
+            font-size: 14px;
+        }
+
+        .footer-links {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            margin: 15px 0;
+            flex-wrap: wrap;
+        }
+
+        .footer-links a {
+            color: var(--muted);
+            text-decoration: none;
+            font-size: 13px;
+            transition: var(--transition);
+        }
+
+        .footer-links a:hover {
+            color: var(--primary);
+        }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 768px) {
+            .hero h1 { font-size: 40px; }
+            .hero p { font-size: 16px; }
+            .nav-links a { font-size: 12px; }
+            .chat-box { width: 320px; height: 450px; right: -20px; }
+            .features-grid { grid-template-columns: 1fr; }
+            .stats { grid-template-columns: repeat(2, 1fr); }
+            .section-title { font-size: 32px; }
+        }
+
+        @media (max-width: 480px) {
+            .hero h1 { font-size: 32px; }
+            .chat-box { width: 290px; right: -40px; }
+            .support-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <!-- ===== BACKGROUND ===== -->
+    <div class="bg-animation">
+        <div class="orb"></div>
+        <div class="orb"></div>
+        <div class="orb"></div>
+    </div>
+    <div class="particles" id="particles"></div>
+
+    <!-- ===== NAVBAR ===== -->
+    <nav class="navbar">
+        <a href="#" class="logo">
+            <i class="fas fa-bolt"></i>
+            <span class="blaze">Blaze</span><span class="xmd">XMD</span>
+        </a>
+        <div class="nav-links">
+            <a href="#features">Features</a>
+            <a href="#support">Support</a>
+            <a href="https://blaze.zone.id" target="_blank" class="btn-nav">Pair Site</a>
+            <a href="/blazesupportlol" class="btn-nav" style="background:var(--secondary);">Admin</a>
+            <button class="theme-toggle" onclick="toggleTheme()">
+                <i class="fas fa-moon" id="themeIcon"></i>
+            </button>
+        </div>
+    </nav>
+
+    <!-- ===== HERO ===== -->
+    <section class="hero">
+        <div class="hero-content">
+            <div class="hero-badge">
+                <i class="fas fa-rocket"></i> Next Generation WhatsApp Bot
+            </div>
+            <h1>
+                Experience <br>
+                <span class="gradient-text">Blaze XMD</span>
+            </h1>
+            <p>
+                Blaze XMD is a powerful WhatsApp bot that transforms your messaging experience with 
+                Auto View Status, Anti-Delete, smart automation, and advanced features. 
+                Trusted by thousands of users worldwide.
+            </p>
+            <div class="hero-buttons">
+                <a href="https://blaze.zone.id" target="_blank" class="btn btn-primary">
+                    <i class="fas fa-link"></i> Go to Pair Site
+                </a>
+                <a href="#support" class="btn btn-secondary">
+                    <i class="fas fa-headset"></i> Support
+                </a>
+            </div>
+            
+            <!-- ===== STATS ===== -->
+            <div class="stats">
+                <div class="stat-item">
+                    <div class="stat-number" id="statUsers">12K+</div>
+                    <div class="stat-label">Active Users</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number" id="statPairs">5K+</div>
+                    <div class="stat-label">Pairs Active</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number" id="statMessages">1.2M</div>
+                    <div class="stat-label">Messages Processed</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number" id="statCountries">50+</div>
+                    <div class="stat-label">Countries</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== FEATURES ===== -->
+    <section class="features" id="features">
+        <h2 class="section-title">
+            <span>Blaze XMD</span> Features
+        </h2>
+        <p class="section-subtitle">
+            Everything you need to automate your WhatsApp experience
+        </p>
+        <div class="features-grid" id="featuresGrid"></div>
+    </section>
+
+    <!-- ===== SUPPORT ===== -->
+    <section class="support-section" id="support">
+        <h2 class="section-title">
+            <span>Support</span> Numbers
+        </h2>
+        <p class="section-subtitle">
+            Contact our support team via WhatsApp or phone call
+        </p>
+        <div class="support-grid" id="supportGrid"></div>
+    </section>
+
+    <!-- ===== FOOTER ===== -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-brand">
+                <span class="blaze">Blaze</span>XMD
+            </div>
+            <div class="footer-links">
+                <a href="#features">Features</a>
+                <a href="#support">Support</a>
+                <a href="https://blaze.zone.id" target="_blank">Pair Site</a>
+                <a href="/blazesupportlol">Admin</a>
+            </div>
+            <p>2024 Blaze XMD. All rights reserved.</p>
+            <p style="font-size:12px;margin-top:5px;">
+                Built for the WhatsApp community
+            </p>
+        </div>
+    </footer>
+
+    <!-- ===== CHAT WIDGET ===== -->
+    <div class="chat-widget">
+        <button class="chat-toggle" onclick="toggleChat()">
+            <i class="fas fa-comment-dots"></i>
+            <span class="online-dot" id="adminDot"></span>
+        </button>
+        <div class="chat-box" id="chatBox">
+            <div class="chat-header">
+                <h3>Live Support</h3>
+                <span class="status" id="adminStatus">Checking...</span>
+            </div>
+            <div class="chat-messages" id="chatMessages">
+                <div class="chat-message admin">
+                    Welcome to Blaze XMD Support!
+                    <span class="time">Just now</span>
+                </div>
+            </div>
+            <div class="chat-input">
+                <input type="text" id="chatInput" placeholder="Type your message..." 
+                       onkeypress="if(event.key==='Enter') sendMessage()">
+                <button onclick="sendMessage()">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== SCRIPTS ===== -->
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+    <script>
+        // ===== THEME =====
+        function toggleTheme() {
+            const html = document.documentElement;
+            const theme = html.getAttribute('data-theme');
+            const newTheme = theme === 'dark' ? 'light' : 'dark';
+            html.setAttribute('data-theme', newTheme);
+            document.getElementById('themeIcon').className = newTheme === 'dark' ? 'fas fa-moon' : 'fas fa-sun';
+            localStorage.setItem('theme', newTheme);
+        }
+
+        const savedTheme = localStorage.getItem('theme') || 'dark';
+        document.documentElement.setAttribute('data-theme', savedTheme);
+        document.getElementById('themeIcon').className = savedTheme === 'dark' ? 'fas fa-moon' : 'fas fa-sun';
+
+        // ===== PARTICLES =====
+        function createParticles() {
+            const container = document.getElementById('particles');
+            for (let i = 0; i < 50; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.animationDuration = (15 + Math.random() * 20) + 's';
+                particle.style.animationDelay = (Math.random() * 20) + 's';
+                particle.style.width = (2 + Math.random() * 4) + 'px';
+                particle.style.height = particle.style.width;
+                container.appendChild(particle);
+            }
+        }
+        createParticles();
+
+        // ===== LOAD FEATURES =====
+        async function loadFeatures() {
+            try {
+                const res = await fetch('/api/features');
+                const features = await res.json();
+                const grid = document.getElementById('featuresGrid');
+                grid.innerHTML = features.map(f => `
+                    <div class="feature-card">
+                        <div class="feature-icon"><i class="fas ${f.icon}"></i></div>
+                        <h3>${f.name}</h3>
+                        <p>${f.description}</p>
+                        ${f.name.includes('Auto View') ? '<span class="feature-badge">Auto View</span>' : ''}
+                    </div>
+                `).join('');
+            } catch (e) {
+                console.error('Error loading features:', e);
+            }
+        }
+
+        // ===== LOAD SUPPORT NUMBERS =====
+        async function loadSupportNumbers() {
+            try {
+                const res = await fetch('/api/support/numbers');
+                const numbers = await res.json();
+                const grid = document.getElementById('supportGrid');
+                
+                if (numbers.length === 0) {
+                    grid.innerHTML = `
+                        <div class="no-support">
+                            <i class="fas fa-info-circle" style="font-size:32px;display:block;margin-bottom:10px;"></i>
+                            No support numbers added yet. Please check back later.
+                        </div>
+                    `;
+                    return;
+                }
+
+                grid.innerHTML = numbers.map(n => `
+                    <div class="support-card">
+                        <span class="flag">${n.flag}</span>
+                        <div class="name">${n.name}</div>
+                        <div class="country">${n.country}</div>
+                        <div class="number">${n.number}</div>
+                        ${n.whatsappLink ? `
+                            <a href="${n.whatsappLink}" target="_blank" class="whatsapp-link">
+                                <i class="fab fa-whatsapp"></i> Chat on WhatsApp
+                            </a>
+                        ` : ''}
+                    </div>
+                `).join('');
+            } catch (e) {
+                console.error('Error loading support numbers:', e);
+            }
+        }
+
+        // ===== CHECK ADMIN STATUS =====
+        async function checkAdminStatus() {
+            try {
+                const res = await fetch('/api/admin/status');
+                const data = await res.json();
+                const dot = document.getElementById('adminDot');
+                const status = document.getElementById('adminStatus');
+                
+                if (data.isOnline) {
+                    dot.className = 'online-dot';
+                    status.textContent = 'Online';
+                    status.style.color = '#00ff88';
+                } else {
+                    dot.className = 'online-dot offline';
+                    status.textContent = 'Offline';
+                    status.style.color = '#ff4444';
+                }
+            } catch (e) {
+                console.error('Error checking admin status:', e);
+            }
+        }
+
+        // ===== LIVE CHAT =====
+        const socket = io();
+        let userId = 'user_' + Date.now();
+
+        function toggleChat() {
+            const box = document.getElementById('chatBox');
+            box.classList.toggle('active');
+            if (box.classList.contains('active')) {
+                socket.emit('join', userId);
+            }
+        }
+
+        function sendMessage() {
+            const input = document.getElementById('chatInput');
+            const message = input.value.trim();
+            if (!message) return;
+
+            const messages = document.getElementById('chatMessages');
+            const msgDiv = document.createElement('div');
+            msgDiv.className = 'chat-message user';
+            msgDiv.innerHTML = `${message}<span class="time">Just now</span>`;
+            messages.appendChild(msgDiv);
+            messages.scrollTop = messages.scrollHeight;
+            input.value = '';
+
+            socket.emit('send-message', {
+                userId: userId,
+                userName: 'Guest',
+                userEmail: '',
+                message: message
+            });
+        }
+
+        socket.on('new-message', (data) => {
+            if (data.userId === userId) return;
+            const messages = document.getElementById('chatMessages');
+            const msgDiv = document.createElement('div');
+            msgDiv.className = 'chat-message admin';
+            const time = new Date(data.timestamp).toLocaleTimeString();
+            msgDiv.innerHTML = `${data.message}<span class="time">${time}</span>`;
+            messages.appendChild(msgDiv);
+            messages.scrollTop = messages.scrollHeight;
+        });
+
+        socket.on('admin-reply', (data) => {
+            const messages = document.getElementById('chatMessages');
+            const msgDiv = document.createElement('div');
+            msgDiv.className = 'chat-message admin';
+            const time = new Date(data.timestamp).toLocaleTimeString();
+            msgDiv.innerHTML = `${data.message.message}<span class="time">${time}</span>`;
+            messages.appendChild(msgDiv);
+            messages.scrollTop = messages.scrollHeight;
+        });
+
+        // ===== INIT =====
+        loadFeatures();
+        loadSupportNumbers();
+        checkAdminStatus();
+        setInterval(checkAdminStatus, 30000);
+    </script>
+</body>
+</html>
