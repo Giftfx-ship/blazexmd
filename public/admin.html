@@ -572,7 +572,7 @@
             margin-bottom: 20px;
         }
 
-        .modal input, .modal select {
+        .modal input {
             width: 100%;
             padding: 10px 14px;
             border: 1.5px solid var(--border);
@@ -586,7 +586,7 @@
             margin-bottom: 10px;
         }
 
-        .modal input:focus, .modal select:focus {
+        .modal input:focus {
             border-color: var(--primary);
         }
 
@@ -993,10 +993,8 @@
             });
 
             socket.on('new-message', (data) => {
-                // Reload sessions and unread count
                 loadSessions();
                 loadUnreadCount();
-                // If this is the currently viewed session, reload messages
                 if (currentVisitorId === data.visitorId) {
                     loadSessionMessages(currentVisitorId);
                 }
@@ -1277,7 +1275,6 @@
             chatPreview.classList.add('active');
             replyArea.classList.add('active');
             await loadSessionMessages(visitorId);
-            // Highlight active session
             document.querySelectorAll('.chat-session').forEach(el => {
                 el.classList.toggle('active', el.onclick && el.onclick.toString().includes(visitorId));
             });
@@ -1299,7 +1296,6 @@
                         </div>
                     `).join('');
                     previewMessages.scrollTop = previewMessages.scrollHeight;
-                    // Load unread count
                     loadUnreadCount();
                 }
             } catch (error) {
@@ -1316,7 +1312,6 @@
             replySendBtn.disabled = true;
             replySendBtn.textContent = 'Sending...';
 
-            // Add admin message to UI
             const adminName = adminNameInput.value || 'Support Team';
             const msgDiv = document.createElement('div');
             msgDiv.className = 'msg admin';
@@ -1328,7 +1323,6 @@
             previewMessages.appendChild(msgDiv);
             previewMessages.scrollTop = previewMessages.scrollHeight;
 
-            // Send via socket
             socket.emit('admin-message', {
                 visitorId: currentVisitorId,
                 message
