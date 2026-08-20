@@ -62,10 +62,11 @@ const ChatSessionSchema = new mongoose.Schema({
   createdAt: { type: Date, default: Date.now }
 });
 
+// ✅ FIXED: Support Number Schema - phone stored WITHOUT spaces
 const SupportSchema = new mongoose.Schema({
   name: { type: String, required: true },
-  phone: { type: String, required: true },
-  countryCode: { type: String, required: true },
+  phone: { type: String, required: true }, // Clean number: 2349164624021
+  countryCode: { type: String, required: true }, // +234
   countryFlag: { type: String, required: true },
   isActive: { type: Boolean, default: true }
 });
@@ -173,35 +174,65 @@ app.post('/api/admin/settings', authenticate, async (req, res) => {
   }
 });
 
-// Get support numbers
+// ✅ FIXED: Get support numbers - Clean phone numbers
 app.get('/api/support', async (req, res) => {
   try {
     const supports = await Support.find({ isActive: true });
-    res.json(supports);
+    // Clean phone numbers on response
+    const cleaned = supports.map(s => ({
+      ...s.toObject(),
+      phone: s.phone.replace(/\s/g, '') // Remove any spaces
+    }));
+    res.json(cleaned);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 });
 
-// Add support number (admin only)
+// ✅ FIXED: Add support number (admin only)
 app.post('/api/admin/support', authenticate, async (req, res) => {
   try {
     const { name, phone, countryCode, countryFlag } = req.body;
-    const support = await Support.create({ name, phone, countryCode, countryFlag });
+    
+    // ✅ Clean phone - remove spaces, dashes, parentheses
+    const cleanPhone = phone.replace(/[\s\-\(\)]/g, '');
+    
+    // ✅ Ensure country code has +
+    let cleanCountryCode = countryCode;
+    if (cleanCountryCode && !cleanCountryCode.startsWith('+')) {
+      cleanCountryCode = '+' + cleanCountryCode;
+    }
+    
+    const support = await Support.create({ 
+      name, 
+      phone: cleanPhone, 
+      countryCode: cleanCountryCode, 
+      countryFlag 
+    });
     res.json(support);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 });
 
-// Edit support number (admin only)
+// ✅ FIXED: Edit support number (admin only)
 app.put('/api/admin/support/:id', authenticate, async (req, res) => {
   try {
     const { id } = req.params;
     const { name, phone, countryCode, countryFlag, isActive } = req.body;
+    
+    // ✅ Clean phone - remove spaces, dashes, parentheses
+    const cleanPhone = phone ? phone.replace(/[\s\-\(\)]/g, '') : '';
+    
+    // ✅ Ensure country code has +
+    let cleanCountryCode = countryCode;
+    if (cleanCountryCode && !cleanCountryCode.startsWith('+')) {
+      cleanCountryCode = '+' + cleanCountryCode;
+    }
+    
     const support = await Support.findByIdAndUpdate(
       id,
-      { name, phone, countryCode, countryFlag, isActive },
+      { name, phone: cleanPhone, countryCode: cleanCountryCode, countryFlag, isActive },
       { new: true }
     );
     res.json(support);
