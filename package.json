@@ -1,13 +1,13 @@
 {
   "name": "blaze-xmd",
   "version": "1.0.0",
-  "description": "Blaze XMD - Professional WhatsApp Bot with Auto View Status",
+  "description": "Blaze XMD - Professional WhatsApp Bot",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
     "dev": "nodemon server.js"
   },
-  "keywords": ["blaze", "xmd", "whatsapp", "bot", "auto-view", "status", "wa"],
+  "keywords": ["blaze", "xmd", "whatsapp", "bot"],
   "author": "Blaze XMD Team",
   "license": "MIT",
   "dependencies": {
