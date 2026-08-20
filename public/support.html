@@ -6,11 +6,7 @@
     <title>Live Chat Support · BLAZE-XMD</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
 
         :root {
             --primary: #25D366;
@@ -25,6 +21,9 @@
             --radius: 16px;
             --shadow: 0 8px 32px rgba(0,0,0,0.3);
             --transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            --success: #22C55E;
+            --danger: #DC2626;
+            --warning: #F59E0B;
         }
 
         body {
@@ -96,135 +95,223 @@
             color: var(--text);
         }
 
-        /* ============ EMAIL LOGIN ============ */
-        .email-container {
-            flex: 1;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 40px 20px;
+        /* ============ EMAIL SECTION (ALWAYS VISIBLE) ============ */
+        .email-section {
+            padding: 20px 0 16px;
+            border-bottom: 1px solid var(--border);
+            background: rgba(0,0,0,0.2);
         }
 
-        .email-card {
-            background: var(--card);
-            padding: 40px 36px;
-            border-radius: var(--radius);
-            border: 1px solid var(--border);
-            max-width: 420px;
-            width: 100%;
+        .email-section .info-text {
+            font-size: 12px;
+            color: var(--muted);
+            margin-top: 8px;
             text-align: center;
         }
 
-        .email-card .icon { font-size: 48px; margin-bottom: 12px; }
-        .email-card h2 { font-size: 24px; font-weight: 800; margin-bottom: 8px; }
-        .email-card p { color: var(--muted); font-size: 14px; margin-bottom: 24px; }
-        .email-card input {
-            width: 100%;
-            padding: 12px 16px;
+        .email-form {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .email-form .field-group {
+            display: flex;
+            gap: 10px;
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .email-form input {
+            flex: 1;
+            padding: 10px 14px;
             border: 1.5px solid var(--border);
             border-radius: 10px;
-            font-size: 14px;
+            font-size: 13px;
             font-family: inherit;
             background: var(--bg);
             color: var(--text);
             outline: none;
             transition: border-color var(--transition);
-            margin-bottom: 12px;
+            min-width: 120px;
         }
-        .email-card input:focus { border-color: var(--primary); }
-        .email-card .btn {
-            width: 100%;
-            padding: 12px;
-            background: var(--primary);
-            color: var(--bg);
+
+        .email-form input:focus {
+            border-color: var(--primary);
+        }
+
+        .email-form input::placeholder {
+            color: var(--muted);
+        }
+
+        .email-buttons {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 10px 20px;
             border: none;
             border-radius: 10px;
-            font-weight: 700;
-            font-size: 15px;
+            font-weight: 600;
+            font-size: 13px;
             cursor: pointer;
             transition: all var(--transition);
             font-family: inherit;
+            white-space: nowrap;
         }
-        .email-card .btn:hover {
+
+        .btn-primary {
+            background: var(--primary);
+            color: var(--bg);
+        }
+        .btn-primary:hover {
             background: var(--primary-teal);
             transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(37, 211, 102, 0.3);
         }
-        .email-error {
-            color: #DC2626;
+        .btn-primary:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
+        .btn-outline {
+            background: transparent;
+            color: var(--text);
+            border: 1.5px solid var(--border);
+        }
+        .btn-outline:hover {
+            border-color: var(--primary);
+            background: rgba(37, 211, 102, 0.05);
+        }
+        .btn-outline:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        .btn-danger {
+            background: var(--danger);
+            color: white;
+        }
+        .btn-danger:hover {
+            opacity: 0.8;
+            transform: translateY(-2px);
+        }
+        .btn-danger:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
+        .btn-success {
+            background: var(--success);
+            color: var(--bg);
+        }
+        .btn-success:hover {
+            opacity: 0.8;
+            transform: translateY(-2px);
+        }
+        .btn-success:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
+        .status-message {
+            padding: 8px 14px;
+            border-radius: 8px;
             font-size: 13px;
-            margin-bottom: 12px;
+            margin-top: 8px;
             display: none;
+            text-align: center;
         }
-        .email-error.show { display: block; }
+        .status-message.show { display: block; }
+        .status-message.success {
+            background: rgba(34, 197, 94, 0.1);
+            color: var(--success);
+            border: 1px solid rgba(34, 197, 94, 0.2);
+        }
+        .status-message.error {
+            background: rgba(220, 38, 38, 0.1);
+            color: var(--danger);
+            border: 1px solid rgba(220, 38, 38, 0.2);
+        }
+        .status-message.info {
+            background: rgba(245, 158, 11, 0.1);
+            color: var(--warning);
+            border: 1px solid rgba(245, 158, 11, 0.2);
+        }
 
         /* ============ CHAT CONTAINER ============ */
         .chat-container {
-            display: none;
             flex: 1;
+            display: flex;
             flex-direction: column;
-            padding: 24px 0 32px;
-            max-height: calc(100vh - 100px);
+            padding: 16px 0 32px;
+            max-height: calc(100vh - 250px);
         }
-        .chat-container.active { display: flex; }
 
         .chat-status {
             display: flex;
             align-items: center;
             gap: 12px;
-            padding: 16px 20px;
+            padding: 12px 16px;
             background: var(--card);
             border-radius: var(--radius);
             border: 1px solid var(--border);
-            margin-bottom: 20px;
+            margin-bottom: 12px;
         }
 
         .status-dot {
-            width: 12px;
-            height: 12px;
+            width: 10px;
+            height: 10px;
             border-radius: 50%;
             background: var(--primary);
             flex-shrink: 0;
         }
-        .status-dot.offline { background: #DC2626; }
+        .status-dot.offline { background: var(--danger); }
 
         .status-info { flex: 1; }
-        .status-info .title { font-weight: 600; font-size: 15px; }
-        .status-info .sub { font-size: 13px; color: var(--muted); }
+        .status-info .title { font-weight: 600; font-size: 14px; }
+        .status-info .sub { font-size: 12px; color: var(--muted); }
 
         .status-badge {
-            padding: 4px 14px;
+            padding: 3px 12px;
             border-radius: 100px;
-            font-size: 12px;
+            font-size: 11px;
             font-weight: 600;
             background: rgba(37, 211, 102, 0.15);
             color: var(--primary);
         }
         .status-badge.offline {
             background: rgba(220, 38, 38, 0.15);
-            color: #DC2626;
+            color: var(--danger);
         }
 
         /* ============ MESSAGES ============ */
         .messages {
             flex: 1;
             overflow-y: auto;
-            padding: 16px 20px;
+            padding: 12px 16px;
             background: var(--card);
             border-radius: var(--radius);
             border: 1px solid var(--border);
-            min-height: 300px;
-            max-height: 500px;
+            min-height: 250px;
+            max-height: 400px;
         }
 
         .messages::-webkit-scrollbar { width: 4px; }
         .messages::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
 
         .chat-message {
-            margin-bottom: 12px;
+            margin-bottom: 10px;
             max-width: 85%;
-            padding: 10px 14px;
+            padding: 8px 14px;
             border-radius: 12px;
-            font-size: 14px;
+            font-size: 13px;
             line-height: 1.5;
             word-wrap: break-word;
             animation: fadeIn 0.2s ease;
@@ -247,10 +334,18 @@
             border: 1px solid var(--border);
             border-bottom-left-radius: 4px;
         }
+        .chat-message.system {
+            background: rgba(255,255,255,0.03);
+            color: var(--muted);
+            text-align: center;
+            font-size: 12px;
+            max-width: 100%;
+            border: none;
+        }
         .chat-message .msg-time {
             font-size: 10px;
             opacity: 0.6;
-            margin-top: 4px;
+            margin-top: 3px;
             display: block;
         }
         .chat-message.user .msg-time { color: rgba(0,0,0,0.5); }
@@ -261,39 +356,37 @@
             margin-bottom: 2px;
             display: block;
         }
-        .chat-message.system {
-            background: rgba(255,255,255,0.03);
+        .chat-message .email-label {
+            font-size: 10px;
             color: var(--muted);
-            text-align: center;
-            font-size: 12px;
-            max-width: 100%;
-            border: none;
+            display: block;
+            margin-top: 2px;
         }
 
         .empty-messages {
             text-align: center;
             color: var(--muted);
-            padding: 40px 20px;
+            padding: 30px 20px;
         }
-        .empty-messages .icon { font-size: 48px; margin-bottom: 12px; }
+        .empty-messages .icon { font-size: 40px; margin-bottom: 8px; }
 
         /* ============ INPUT ============ */
         .input-area {
             display: flex;
-            gap: 12px;
-            padding: 16px 20px;
+            gap: 10px;
+            padding: 12px 16px;
             background: var(--card);
             border-radius: var(--radius);
             border: 1px solid var(--border);
-            margin-top: 16px;
+            margin-top: 12px;
         }
 
         .input-area input {
             flex: 1;
-            padding: 12px 16px;
+            padding: 10px 14px;
             border: 1.5px solid var(--border);
             border-radius: 10px;
-            font-size: 14px;
+            font-size: 13px;
             font-family: inherit;
             background: var(--bg);
             color: var(--text);
@@ -308,75 +401,89 @@
         }
 
         .input-area button {
-            padding: 12px 28px;
+            padding: 10px 22px;
             background: var(--primary);
             color: var(--bg);
             border: none;
             border-radius: 10px;
             font-weight: 600;
-            font-size: 14px;
+            font-size: 13px;
             cursor: pointer;
             transition: all var(--transition);
             font-family: inherit;
             white-space: nowrap;
         }
-        .input-area button:hover { background: var(--primary-teal); transform: scale(1.02); }
+        .input-area button:hover:not(:disabled) {
+            background: var(--primary-teal);
+            transform: scale(1.02);
+        }
         .input-area button:disabled {
             opacity: 0.5;
             cursor: not-allowed;
             transform: none;
         }
 
+        .chat-footer-info {
+            display: flex;
+            justify-content: space-between;
+            font-size: 11px;
+            color: var(--muted);
+            margin-top: 6px;
+            padding: 0 4px;
+        }
+        .chat-footer-info strong { color: var(--success); }
+
         /* ============ SUPPORT NUMBERS ============ */
         .support-numbers-section {
-            margin-top: 20px;
-            padding: 16px 20px;
+            margin-top: 12px;
+            padding: 12px 16px;
             background: var(--card);
             border-radius: var(--radius);
             border: 1px solid var(--border);
         }
         .support-numbers-section h4 {
-            font-size: 14px;
+            font-size: 13px;
             font-weight: 600;
-            margin-bottom: 12px;
+            margin-bottom: 8px;
             color: var(--muted);
         }
 
         .support-numbers-list {
             display: flex;
             flex-direction: column;
-            gap: 8px;
+            gap: 6px;
         }
 
         .support-number-item {
             display: flex;
             align-items: center;
-            gap: 12px;
-            padding: 10px 14px;
+            gap: 10px;
+            padding: 8px 12px;
             background: rgba(255,255,255,0.03);
-            border-radius: 10px;
+            border-radius: 8px;
             border: 1px solid var(--border);
             transition: all var(--transition);
             text-decoration: none;
             color: var(--text);
+            font-size: 13px;
         }
         .support-number-item:hover {
             border-color: var(--primary);
             background: rgba(37, 211, 102, 0.05);
         }
-        .support-number-item .flag { font-size: 24px; }
+        .support-number-item .flag { font-size: 20px; }
         .support-number-item .info { flex: 1; }
-        .support-number-item .info .name { font-size: 13px; font-weight: 600; }
-        .support-number-item .info .phone { font-size: 12px; color: var(--muted); }
-        .support-number-item .whatsapp-icon { color: var(--primary); font-size: 20px; }
+        .support-number-item .info .name { font-weight: 600; }
+        .support-number-item .info .phone { color: var(--muted); font-size: 12px; }
+        .support-number-item .whatsapp-icon { color: var(--primary); font-size: 18px; }
 
         .empty-support {
-            padding: 16px;
+            padding: 12px;
             text-align: center;
             color: var(--muted);
             font-size: 13px;
             border: 1px dashed var(--border);
-            border-radius: 10px;
+            border-radius: 8px;
         }
 
         /* ============ TOAST ============ */
@@ -387,10 +494,10 @@
             transform: translateX(-50%) translateY(100px);
             background: var(--card);
             color: var(--text);
-            padding: 12px 24px;
+            padding: 10px 20px;
             border-radius: var(--radius);
             border: 1px solid var(--border);
-            font-size: 14px;
+            font-size: 13px;
             font-weight: 500;
             z-index: 999;
             opacity: 0;
@@ -402,32 +509,38 @@
             opacity: 1;
             transform: translateX(-50%) translateY(0);
         }
-        .toast.error { border-color: #DC2626; }
+        .toast.error { border-color: var(--danger); }
         .toast.success { border-color: var(--primary); }
+        .toast.warning { border-color: var(--warning); }
 
         /* ============ RESPONSIVE ============ */
         @media (max-width: 640px) {
             .header { padding: 14px 0; }
             .logo { font-size: 17px; }
             .logo-icon { width: 28px; height: 28px; line-height: 28px; font-size: 13px; }
-            .chat-status { flex-wrap: wrap; }
-            .status-badge { margin-left: auto; }
-            .messages { min-height: 200px; max-height: 350px; padding: 12px 14px; }
-            .input-area { flex-direction: column; padding: 12px 16px; }
+            .email-form { flex-direction: column; }
+            .email-form .field-group { flex-direction: column; width: 100%; }
+            .email-form input { width: 100%; }
+            .email-buttons { width: 100%; }
+            .email-buttons .btn { flex: 1; text-align: center; font-size: 12px; padding: 8px 12px; }
+            .status-message { font-size: 12px; }
+            .messages { min-height: 180px; max-height: 280px; padding: 10px 12px; }
+            .chat-message { max-width: 95%; font-size: 12px; padding: 6px 10px; }
+            .input-area { flex-direction: column; padding: 10px 12px; }
             .input-area button { width: 100%; }
-            .chat-message { max-width: 95%; font-size: 13px; padding: 8px 12px; }
-            .support-numbers-section { padding: 12px 16px; }
-            .btn-back { font-size: 12px; padding: 6px 14px; }
-            .email-card { padding: 28px 20px; }
+            .support-numbers-section { padding: 10px 12px; }
+            .btn-back { font-size: 12px; padding: 6px 12px; }
+            .chat-status { padding: 10px 12px; }
+            .status-info .title { font-size: 13px; }
+            .status-info .sub { font-size: 11px; }
         }
 
         @media (max-width: 380px) {
             .container { padding: 0 12px; }
-            .messages { max-height: 250px; min-height: 150px; }
-            .status-info .title { font-size: 13px; }
-            .status-info .sub { font-size: 11px; }
-            .support-number-item { padding: 8px 10px; }
-            .support-number-item .flag { font-size: 18px; }
+            .messages { max-height: 200px; min-height: 120px; }
+            .email-buttons .btn { font-size: 11px; padding: 6px 8px; }
+            .support-number-item { font-size: 12px; padding: 6px 10px; }
+            .support-number-item .flag { font-size: 16px; }
         }
     </style>
 </head>
@@ -443,16 +556,27 @@
         </div>
     </header>
 
-    <!-- ============ EMAIL CONTAINER ============ -->
-    <div class="email-container" id="emailContainer">
-        <div class="email-card">
-            <div class="icon">💬</div>
-            <h2>Start a Conversation</h2>
-            <p>Enter your email to chat with our support team.</p>
-            <div class="email-error" id="emailError">Please enter a valid email</div>
-            <input type="email" id="emailInput" placeholder="Enter your email address..." />
-            <input type="text" id="nameInput" placeholder="Your name (optional)" />
-            <button class="btn" id="startChatBtn">Start Chat</button>
+    <!-- ============ EMAIL SECTION (ALWAYS VISIBLE) ============ -->
+    <div class="email-section" id="emailSection">
+        <div class="container">
+            <div class="email-form">
+                <div class="field-group">
+                    <input type="email" id="emailInput" placeholder="Your email address" />
+                    <input type="text" id="nameInput" placeholder="Your name (optional)" />
+                </div>
+                <div class="email-buttons">
+                    <button class="btn btn-primary" id="continueBtn" disabled>
+                        📩 Continue Old Conversation
+                    </button>
+                    <button class="btn btn-outline" id="newBtn" disabled>
+                        🔄 Start New Conversation
+                    </button>
+                </div>
+            </div>
+            <div class="status-message" id="statusMessage"></div>
+            <div class="info-text">
+                💬 Enter your email then choose an option above
+            </div>
         </div>
     </div>
 
@@ -464,7 +588,7 @@
             <div class="chat-status">
                 <div class="status-dot" id="statusDot"></div>
                 <div class="status-info">
-                    <div class="title">💬 Live Chat Support</div>
+                    <div class="title" id="chatTitle">💬 Live Chat Support</div>
                     <div class="sub" id="statusText">Online - Replies within seconds</div>
                 </div>
                 <span class="status-badge" id="statusBadge">🟢 Online</span>
@@ -474,8 +598,8 @@
             <div class="messages" id="messages">
                 <div class="empty-messages" id="emptyMessages">
                     <div class="icon">💬</div>
-                    <p>Start a conversation with our support team.</p>
-                    <p style="font-size: 12px; margin-top: 4px;">We typically reply within seconds.</p>
+                    <p>Enter your email above to start chatting</p>
+                    <p style="font-size: 12px; margin-top: 4px;">We typically reply within seconds</p>
                 </div>
             </div>
 
@@ -483,6 +607,10 @@
             <div class="input-area">
                 <input type="text" id="chatInput" placeholder="Type your message..." disabled />
                 <button id="chatSendBtn" disabled>Send</button>
+            </div>
+            <div class="chat-footer-info">
+                <span>🔒 End-to-end encrypted</span>
+                <span>Usually replies in <strong>2-5 minutes</strong></span>
             </div>
 
             <!-- Support Numbers -->
@@ -505,16 +633,16 @@
         let userName = '';
         let adminName = 'Support Team';
         let isOnline = true;
-        let messagesLoaded = false;
+        let isChatActive = false;
         let socket = null;
+        let currentMessages = [];
 
         // ============ DOM REFS ============
-        const emailContainer = document.getElementById('emailContainer');
-        const chatContainer = document.getElementById('chatContainer');
         const emailInput = document.getElementById('emailInput');
         const nameInput = document.getElementById('nameInput');
-        const startChatBtn = document.getElementById('startChatBtn');
-        const emailError = document.getElementById('emailError');
+        const continueBtn = document.getElementById('continueBtn');
+        const newBtn = document.getElementById('newBtn');
+        const statusMessage = document.getElementById('statusMessage');
 
         const messages = document.getElementById('messages');
         const chatInput = document.getElementById('chatInput');
@@ -522,34 +650,33 @@
         const statusDot = document.getElementById('statusDot');
         const statusText = document.getElementById('statusText');
         const statusBadge = document.getElementById('statusBadge');
+        const chatTitle = document.getElementById('chatTitle');
         const emptyMessages = document.getElementById('emptyMessages');
         const supportNumbers = document.getElementById('supportNumbers');
         const emptySupport = document.getElementById('emptySupport');
 
-        // ============ LOCAL STORAGE FUNCTIONS ============
-        function getSavedEmail() {
-            return localStorage.getItem('blaze_user_email') || null;
+        // ============ ENABLE/DISABLE BUTTONS ============
+        function updateButtons() {
+            const email = emailInput.value.trim();
+            const hasEmail = email.length > 0 && email.includes('@');
+            continueBtn.disabled = !hasEmail;
+            newBtn.disabled = !hasEmail;
         }
 
-        function getSavedVisitorId() {
-            return localStorage.getItem('blaze_visitor_id') || null;
-        }
+        emailInput.addEventListener('input', updateButtons);
+        nameInput.addEventListener('input', updateButtons);
 
-        function getSavedName() {
-            return localStorage.getItem('blaze_user_name') || null;
-        }
-
-        function saveChatSession(email, vid, name) {
-            localStorage.setItem('blaze_user_email', email);
-            localStorage.setItem('blaze_visitor_id', vid);
-            if (name) localStorage.setItem('blaze_user_name', name);
-        }
-
-        function clearChatSession() {
-            localStorage.removeItem('blaze_user_email');
-            localStorage.removeItem('blaze_visitor_id');
-            localStorage.removeItem('blaze_user_name');
-        }
+        // Enter key on email/name triggers continue
+        emailInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && !continueBtn.disabled) {
+                continueBtn.click();
+            }
+        });
+        nameInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && !continueBtn.disabled) {
+                continueBtn.click();
+            }
+        });
 
         // ============ TOAST ============
         function showToast(message, type = 'info') {
@@ -568,137 +695,14 @@
             }, 3000);
         }
 
-        // ============ CHECK FOR EXISTING SESSION ============
-        async function checkExistingSession() {
-            const savedEmail = getSavedEmail();
-            const savedVisitorId = getSavedVisitorId();
-            const savedName = getSavedName();
-
-            if (savedEmail && savedVisitorId) {
-                visitorId = savedVisitorId;
-                userEmail = savedEmail;
-                userName = savedName || savedEmail.split('@')[0] || 'Guest';
-
-                // Verify session still exists
-                try {
-                    const res = await fetch(`/api/chat/messages/${visitorId}`);
-                    const data = await res.json();
-                    if (data.session) {
-                        // Existing session found - skip email step
-                        emailContainer.style.display = 'none';
-                        chatContainer.classList.add('active');
-                        
-                        connectSocket();
-                        await loadMessageHistory();
-
-                        chatInput.disabled = false;
-                        chatSendBtn.disabled = false;
-                        chatInput.placeholder = 'Type your message...';
-
-                        console.log('✅ Restored existing session:', userEmail);
-                        return;
-                    }
-                } catch (error) {
-                    console.log('No existing session found');
-                }
-            }
-            
-            // No session - show email form
-            emailContainer.style.display = 'flex';
-            chatContainer.classList.remove('active');
+        // ============ SHOW STATUS MESSAGE ============
+        function showStatus(message, type = 'info') {
+            statusMessage.textContent = message;
+            statusMessage.className = 'status-message ' + type + ' show';
         }
 
-        // ============ START CHAT ============
-        startChatBtn.addEventListener('click', async () => {
-            const email = emailInput.value.trim();
-            const name = nameInput.value.trim() || email.split('@')[0] || 'Guest';
-
-            if (!email || !email.includes('@')) {
-                emailError.textContent = 'Please enter a valid email address';
-                emailError.classList.add('show');
-                return;
-            }
-
-            emailError.classList.remove('show');
-
-            try {
-                const res = await fetch('/api/chat/session', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email, name })
-                });
-
-                const data = await res.json();
-                if (data.session) {
-                    visitorId = data.visitorId;
-                    userEmail = email;
-                    userName = name;
-
-                    // ✅ Save to localStorage
-                    saveChatSession(email, visitorId, name);
-
-                    // Show chat
-                    emailContainer.style.display = 'none';
-                    chatContainer.classList.add('active');
-
-                    // Connect socket
-                    connectSocket();
-
-                    // Load messages
-                    await loadMessageHistory();
-
-                    // Enable input
-                    chatInput.disabled = false;
-                    chatSendBtn.disabled = false;
-                    chatInput.placeholder = 'Type your message...';
-
-                    showToast('✅ Connected!', 'success');
-                }
-            } catch (error) {
-                console.error('Error starting chat:', error);
-                showToast('Error connecting. Please try again.', 'error');
-            }
-        });
-
-        // Enter key for email
-        emailInput.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter') startChatBtn.click();
-        });
-        nameInput.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter') startChatBtn.click();
-        });
-
-        // ============ CONNECT SOCKET ============
-        function connectSocket() {
-            if (socket) socket.disconnect();
-            socket = io();
-
-            socket.on('connect', () => {
-                console.log('✅ Socket connected');
-                socket.emit('join-room', visitorId);
-            });
-
-            socket.on('admin-reply', (data) => {
-                addMessageToUI(data.message, true, data.adminName);
-            });
-
-            socket.on('message-deleted', (data) => {
-                if (data.visitorId === visitorId) {
-                    loadMessageHistory();
-                }
-            });
-
-            socket.on('session-cleared', (data) => {
-                if (data.visitorId === visitorId) {
-                    messages.innerHTML = '';
-                    emptyMessages.style.display = 'block';
-                    loadMessageHistory();
-                }
-            });
-
-            socket.on('disconnect', () => {
-                console.log('⚠️ Socket disconnected');
-            });
+        function hideStatus() {
+            statusMessage.className = 'status-message';
         }
 
         // ============ FETCH SETTINGS ============
@@ -722,7 +726,7 @@
                 statusText.textContent = 'Online - Replies within seconds';
                 statusBadge.textContent = '🟢 Online';
                 statusBadge.className = 'status-badge';
-                if (chatInput) {
+                if (isChatActive) {
                     chatInput.disabled = false;
                     chatSendBtn.disabled = false;
                     chatInput.placeholder = 'Type your message...';
@@ -732,11 +736,9 @@
                 statusText.textContent = 'Offline - Please try again later';
                 statusBadge.textContent = '🔴 Offline';
                 statusBadge.className = 'status-badge offline';
-                if (chatInput) {
-                    chatInput.disabled = true;
-                    chatSendBtn.disabled = true;
-                    chatInput.placeholder = 'Support is currently offline';
-                }
+                chatInput.disabled = true;
+                chatSendBtn.disabled = true;
+                chatInput.placeholder = 'Support is currently offline';
             }
         }
 
@@ -776,7 +778,7 @@
             }, 50);
         }
 
-        function addMessageToUI(message, isAdmin = false, adminNameText = '', isSystem = false) {
+        function addMessageToUI(message, isAdmin = false, adminNameText = '', isSystem = false, email = '') {
             emptyMessages.style.display = 'none';
 
             const div = document.createElement('div');
@@ -787,43 +789,153 @@
                 html += `<span class="admin-name">${adminNameText}</span>`;
             }
             html += message;
+            if (email && !isSystem) {
+                html += `<span class="email-label">${email}</span>`;
+            }
             html += `<span class="msg-time">${new Date().toLocaleTimeString()}</span>`;
             div.innerHTML = html;
             messages.appendChild(div);
             scrollToBottom();
         }
 
-        // ============ LOAD MESSAGE HISTORY ============
-        async function loadMessageHistory() {
-            if (!visitorId) return;
-
-            try {
-                const res = await fetch(`/api/chat/messages/${visitorId}`);
-                const data = await res.json();
-                
-                if (data.messages && data.messages.length > 0) {
-                    emptyMessages.style.display = 'none';
-                    messages.innerHTML = '';
-                    data.messages.forEach(msg => {
-                        const isAdmin = msg.isFromAdmin || false;
-                        const adminNameText = msg.adminName || 'Support Team';
-                        addMessageToUI(msg.message, isAdmin, adminNameText);
-                    });
-                    console.log(`✅ Loaded ${data.messages.length} messages from database`);
-                } else {
-                    emptyMessages.style.display = 'block';
-                }
-                
-                messagesLoaded = true;
-            } catch (error) {
-                console.error('Error loading message history:', error);
+        // ============ LOAD MESSAGES ============
+        function loadMessages(messagesData) {
+            messages.innerHTML = '';
+            if (messagesData && messagesData.length > 0) {
+                messagesData.forEach(msg => {
+                    const isAdmin = msg.isFromAdmin || false;
+                    const adminNameText = msg.adminName || 'Support Team';
+                    addMessageToUI(msg.message, isAdmin, adminNameText, false, msg.email || '');
+                });
+            } else {
+                emptyMessages.style.display = 'block';
             }
         }
+
+        // ============ CONTINUE CONVERSATION ============
+        continueBtn.addEventListener('click', async () => {
+            const email = emailInput.value.trim();
+            const name = nameInput.value.trim() || email.split('@')[0] || 'Guest';
+
+            if (!email || !email.includes('@')) {
+                showStatus('Please enter a valid email address', 'error');
+                return;
+            }
+
+            continueBtn.disabled = true;
+            continueBtn.textContent = 'Checking...';
+
+            try {
+                const res = await fetch('/api/chat/check-email', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email })
+                });
+
+                const data = await res.json();
+
+                if (data.exists) {
+                    visitorId = data.session.visitorId;
+                    userEmail = email;
+                    userName = name;
+                    isChatActive = true;
+                    
+                    // Load messages
+                    loadMessages(data.messages);
+                    
+                    // Update title
+                    chatTitle.textContent = `💬 ${email} (${data.totalMessages} messages)`;
+                    
+                    // Enable chat
+                    chatInput.disabled = false;
+                    chatSendBtn.disabled = false;
+                    chatInput.placeholder = 'Type your message...';
+                    
+                    // Connect socket
+                    connectSocket();
+                    
+                    showStatus(`✅ Welcome back! ${data.totalMessages} messages loaded`, 'success');
+                    showToast(`✅ Loaded ${data.totalMessages} messages`, 'success');
+                } else {
+                    showStatus('❌ No conversation found for this email. Try "Start New Conversation"', 'error');
+                }
+            } catch (error) {
+                console.error('Error checking email:', error);
+                showStatus('Error checking email. Please try again.', 'error');
+            } finally {
+                continueBtn.disabled = false;
+                continueBtn.textContent = '📩 Continue Old Conversation';
+            }
+        });
+
+        // ============ START NEW CONVERSATION ============
+        newBtn.addEventListener('click', async () => {
+            const email = emailInput.value.trim();
+            const name = nameInput.value.trim() || email.split('@')[0] || 'Guest';
+
+            if (!email || !email.includes('@')) {
+                showStatus('Please enter a valid email address', 'error');
+                return;
+            }
+
+            if (!confirm(`⚠️ This will delete ALL existing messages for ${email} and start fresh. Continue?`)) {
+                return;
+            }
+
+            newBtn.disabled = true;
+            newBtn.textContent = 'Creating...';
+
+            try {
+                const res = await fetch('/api/chat/session', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, name })
+                });
+
+                const data = await res.json();
+
+                if (data.success) {
+                    visitorId = data.visitorId;
+                    userEmail = email;
+                    userName = name;
+                    isChatActive = true;
+                    
+                    // Clear messages
+                    messages.innerHTML = '';
+                    emptyMessages.style.display = 'block';
+                    
+                    // Update title
+                    chatTitle.textContent = `💬 ${email} (New Conversation)`;
+                    
+                    // Enable chat
+                    chatInput.disabled = false;
+                    chatSendBtn.disabled = false;
+                    chatInput.placeholder = 'Type your message...';
+                    
+                    // Connect socket
+                    connectSocket();
+                    
+                    // Add welcome message
+                    addMessageToUI('👋 New conversation started! How can we help you?', true, 'Support Team', false, email);
+                    
+                    showStatus('✅ New conversation started!', 'success');
+                    showToast('✅ New conversation created!', 'success');
+                } else {
+                    showStatus('❌ Failed to create conversation', 'error');
+                }
+            } catch (error) {
+                console.error('Error creating session:', error);
+                showStatus('Error creating conversation. Please try again.', 'error');
+            } finally {
+                newBtn.disabled = false;
+                newBtn.textContent = '🔄 Start New Conversation';
+            }
+        });
 
         // ============ SEND MESSAGE ============
         async function sendMessage() {
             const message = chatInput.value.trim();
-            if (!message) return;
+            if (!message || !visitorId || !isChatActive) return;
             if (!isOnline) {
                 addMessageToUI('⚠️ Support is currently offline. Please try again later.', false, '', true);
                 chatInput.value = '';
@@ -834,7 +946,7 @@
             chatSendBtn.textContent = 'Sending...';
 
             // Add to UI
-            addMessageToUI(message, false);
+            addMessageToUI(message, false, '', false, userEmail);
 
             // Send to server
             try {
@@ -860,7 +972,7 @@
             }
 
             // Emit via socket
-            if (socket) {
+            if (socket && socket.connected) {
                 socket.emit('visitor-message', {
                     visitorId,
                     name: userName || 'Guest',
@@ -874,23 +986,96 @@
             chatSendBtn.textContent = 'Send';
         }
 
-        // ============ EVENT LISTENERS ============
         chatSendBtn.addEventListener('click', sendMessage);
         chatInput.addEventListener('keydown', (e) => {
             if (e.key === 'Enter') sendMessage();
         });
 
+        // ============ CONNECT SOCKET ============
+        function connectSocket() {
+            if (socket) socket.disconnect();
+            socket = io();
+
+            socket.on('connect', () => {
+                console.log('✅ Socket connected');
+                if (visitorId) {
+                    socket.emit('join-room', visitorId);
+                }
+            });
+
+            socket.on('admin-reply', (data) => {
+                addMessageToUI(data.message, true, data.adminName, false, userEmail);
+            });
+
+            socket.on('message-deleted', (data) => {
+                if (data.visitorId === visitorId) {
+                    // Reload messages
+                    fetch(`/api/chat/messages/${visitorId}`)
+                        .then(res => res.json())
+                        .then(data => {
+                            if (data.messages) loadMessages(data.messages);
+                        });
+                }
+            });
+
+            socket.on('session-cleared', (data) => {
+                if (data.visitorId === visitorId) {
+                    messages.innerHTML = '';
+                    emptyMessages.style.display = 'block';
+                }
+            });
+
+            socket.on('disconnect', () => {
+                console.log('⚠️ Socket disconnected');
+            });
+        }
+
         // ============ INIT ============
         async function init() {
             await fetchSettings();
             await fetchSupportNumbers();
-            await checkExistingSession();
+            updateButtons();
+            
+            // Check if there's a saved email in localStorage
+            const savedEmail = localStorage.getItem('blaze_user_email');
+            if (savedEmail) {
+                emailInput.value = savedEmail;
+                const savedName = localStorage.getItem('blaze_user_name');
+                if (savedName) nameInput.value = savedName;
+                updateButtons();
+                // Auto-check after a moment
+                setTimeout(() => {
+                    if (emailInput.value.trim()) {
+                        continueBtn.click();
+                    }
+                }, 500);
+            }
+            
+            console.log('🚀 BLAZE-XMD Support Chat loaded');
+            console.log('💬 Email form always visible');
         }
 
-        init();
+        // Save email to localStorage when chat starts
+        function saveEmailToLocalStorage(email, name) {
+            localStorage.setItem('blaze_user_email', email);
+            if (name) localStorage.setItem('blaze_user_name', name);
+        }
 
-        console.log('🚀 BLAZE-XMD Support Chat loaded');
-        console.log('💾 Messages saved in MongoDB by email');
+        // Override the continue and new buttons to save email
+        const originalContinueClick = continueBtn.click;
+        continueBtn.addEventListener('click', () => {
+            const email = emailInput.value.trim();
+            const name = nameInput.value.trim();
+            if (email) saveEmailToLocalStorage(email, name);
+        });
+
+        newBtn.addEventListener('click', () => {
+            const email = emailInput.value.trim();
+            const name = nameInput.value.trim();
+            if (email) saveEmailToLocalStorage(email, name);
+        });
+
+        init();
     </script>
 </body>
 </html>
