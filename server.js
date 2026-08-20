@@ -18,11 +18,9 @@ const io = socketIO(server, {
   }
 });
 
-// ============ MIDDLEWARE ===========
+// ============ MIDDLEWARE ============
 app.use(cors());
 app.use(express.json());
-
-// ✅ Serve static files from 'public' folder
 app.use(express.static(path.join(__dirname, 'public')));
 
 const limiter = rateLimit({
@@ -37,15 +35,14 @@ mongoose.connect(process.env.MONGODB_URI, {
   useUnifiedTopology: true,
 })
 .then(() => console.log('✅ Database Connected'))
-.catch(err => {
-  console.error('❌ Database Error:', err.message);
-});
+.catch(err => console.error('❌ Database Error:', err.message));
 
 // ============ MODELS ============
+
+// ✅ Chat Message Schema
 const ChatMessageSchema = new mongoose.Schema({
-  visitorId: { type: String, required: true },
+  visitorId: { type: String, required: true, index: true },
   name: { type: String, default: 'Guest' },
-  email: { type: String, default: '' },
   message: { type: String, required: true },
   isFromAdmin: { type: Boolean, default: false },
   adminName: { type: String, default: 'Support Team' },
@@ -53,15 +50,18 @@ const ChatMessageSchema = new mongoose.Schema({
   timestamp: { type: Date, default: Date.now }
 });
 
+// ✅ Chat Session Schema - Stores every user session
 const ChatSessionSchema = new mongoose.Schema({
   visitorId: { type: String, required: true, unique: true },
   name: { type: String, default: 'Guest' },
-  email: { type: String, default: '' },
   isActive: { type: Boolean, default: true },
   lastMessageAt: { type: Date, default: Date.now },
-  unreadCount: { type: Number, default: 0 }
+  unreadCount: { type: Number, default: 0 },
+  totalMessages: { type: Number, default: 0 },
+  createdAt: { type: Date, default: Date.now }
 });
 
+// ✅ Support Number Schema
 const SupportSchema = new mongoose.Schema({
   name: { type: String, required: true },
   phone: { type: String, required: true },
@@ -70,12 +70,14 @@ const SupportSchema = new mongoose.Schema({
   isActive: { type: Boolean, default: true }
 });
 
+// ✅ Settings Schema
 const SettingsSchema = new mongoose.Schema({
   isOnline: { type: Boolean, default: true },
   adminName: { type: String, default: 'Support Team' },
   welcomeMessage: { type: String, default: 'Hello! How can I help you?' }
 });
 
+// ✅ Admin Schema
 const AdminSchema = new mongoose.Schema({
   username: { type: String, required: true, unique: true },
   password: { type: String, required: true }
@@ -221,7 +223,125 @@ app.delete('/api/admin/support/:id', authenticate, async (req, res) => {
   }
 });
 
-// Get chat sessions (admin only)
+// ============ CHAT API ROUTES ============
+
+// ✅ Get or create session for visitor
+app.post('/api/chat/session', async (req, res) => {
+  try {
+    const { visitorId, name } = req.body;
+    
+    if (!visitorId) {
+      return res.status(400).json({ error: 'visitorId required' });
+    }
+    
+    let session = await ChatSession.findOne({ visitorId });
+    
+    if (!session) {
+      session = await ChatSession.create({
+        visitorId,
+        name: name || 'Guest',
+        isActive: true,
+        lastMessageAt: new Date(),
+        unreadCount: 0,
+        totalMessages: 0
+      });
+      console.log(`✅ New session created: ${visitorId} (${session.name})`);
+    } else {
+      // Update name if provided and different
+      if (name && name !== 'Guest' && session.name === 'Guest') {
+        session.name = name;
+        await session.save();
+      }
+    }
+    
+    res.json({ session });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// ✅ Get chat history for a visitor
+app.get('/api/chat/messages/:visitorId', async (req, res) => {
+  try {
+    const { visitorId } = req.params;
+    const messages = await ChatMessage.find({ visitorId }).sort({ timestamp: 1 });
+    
+    // Get session info
+    const session = await ChatSession.findOne({ visitorId });
+    
+    res.json({ 
+      messages,
+      session: session || null
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// ✅ Send message (visitor)
+app.post('/api/chat/send', async (req, res) => {
+  try {
+    const { visitorId, name, message } = req.body;
+    
+    if (!visitorId || !message) {
+      return res.status(400).json({ error: 'visitorId and message required' });
+    }
+    
+    // Save message
+    const newMessage = await ChatMessage.create({
+      visitorId,
+      name: name || 'Guest',
+      message,
+      isFromAdmin: false,
+      isRead: false
+    });
+    
+    // Update or create session
+    const session = await ChatSession.findOneAndUpdate(
+      { visitorId },
+      {
+        $set: { 
+          lastMessageAt: new Date(),
+          name: name || 'Guest',
+          isActive: true
+        },
+        $inc: { 
+          unreadCount: 1,
+          totalMessages: 1
+        }
+      },
+      { 
+        upsert: true, 
+        new: true 
+      }
+    );
+    
+    // ✅ Emit to admin (real-time)
+    io.emit('new-message', {
+      visitorId,
+      name: name || 'Guest',
+      message,
+      timestamp: newMessage.timestamp,
+      isFromAdmin: false,
+      session: session
+    });
+    
+    // ✅ Emit unread count update
+    const unreadCount = await ChatMessage.countDocuments({ isRead: false, isFromAdmin: false });
+    io.emit('unread-update', { unread: unreadCount });
+    
+    res.json({ 
+      success: true, 
+      message: newMessage,
+      session: session
+    });
+  } catch (error) {
+    console.error('❌ Error sending message:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// ✅ Get all chat sessions (admin only)
 app.get('/api/admin/sessions', authenticate, async (req, res) => {
   try {
     const sessions = await ChatSession.find().sort({ lastMessageAt: -1 });
@@ -231,29 +351,41 @@ app.get('/api/admin/sessions', authenticate, async (req, res) => {
   }
 });
 
-// Get messages for a session (admin only)
+// ✅ Get messages for a session (admin only)
 app.get('/api/admin/session/:visitorId/messages', authenticate, async (req, res) => {
   try {
     const { visitorId } = req.params;
     const messages = await ChatMessage.find({ visitorId }).sort({ timestamp: 1 });
     
+    // ✅ Mark messages as read
     await ChatMessage.updateMany(
       { visitorId, isRead: false },
       { isRead: true }
     );
     
+    // ✅ Reset unread count
     await ChatSession.findOneAndUpdate(
       { visitorId },
       { unreadCount: 0 }
     );
     
-    res.json({ messages });
+    // Get updated session
+    const session = await ChatSession.findOne({ visitorId });
+    
+    // ✅ Emit unread count update
+    const unreadCount = await ChatMessage.countDocuments({ isRead: false, isFromAdmin: false });
+    io.emit('unread-update', { unread: unreadCount });
+    
+    res.json({ 
+      messages,
+      session: session || null
+    });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 });
 
-// Get unread count (admin only)
+// ✅ Get unread count (admin only)
 app.get('/api/admin/unread-count', authenticate, async (req, res) => {
   try {
     const count = await ChatMessage.countDocuments({ isRead: false, isFromAdmin: false });
@@ -263,11 +395,66 @@ app.get('/api/admin/unread-count', authenticate, async (req, res) => {
   }
 });
 
-// Delete message (admin only)
+// ✅ Admin reply to message
+app.post('/api/admin/reply', authenticate, async (req, res) => {
+  try {
+    const { visitorId, message } = req.body;
+    
+    if (!visitorId || !message) {
+      return res.status(400).json({ error: 'visitorId and message required' });
+    }
+    
+    const settings = await Settings.findOne();
+    const adminName = settings?.adminName || 'Support Team';
+    
+    // Save admin message
+    const newMessage = await ChatMessage.create({
+      visitorId,
+      message,
+      isFromAdmin: true,
+      adminName: adminName,
+      isRead: true
+    });
+    
+    // Update session
+    await ChatSession.findOneAndUpdate(
+      { visitorId },
+      {
+        $set: { 
+          lastMessageAt: new Date(),
+          isActive: true
+        },
+        $inc: { totalMessages: 1 }
+      }
+    );
+    
+    // ✅ Emit to visitor (real-time)
+    io.to(visitorId).emit('admin-reply', {
+      message,
+      adminName,
+      timestamp: newMessage.timestamp
+    });
+    
+    res.json({ 
+      success: true, 
+      message: newMessage 
+    });
+  } catch (error) {
+    console.error('❌ Error sending admin reply:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// ✅ Delete message (admin only)
 app.delete('/api/admin/message/:id', authenticate, async (req, res) => {
   try {
     const { id } = req.params;
-    await ChatMessage.findByIdAndDelete(id);
+    const deleted = await ChatMessage.findByIdAndDelete(id);
+    
+    if (!deleted) {
+      return res.status(404).json({ error: 'Message not found' });
+    }
+    
     res.json({ success: true });
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -278,51 +465,70 @@ app.delete('/api/admin/message/:id', authenticate, async (req, res) => {
 io.on('connection', (socket) => {
   console.log('🔌 New connection:', socket.id);
 
+  // ✅ Visitor joins their room
+  socket.on('join-room', (visitorId) => {
+    socket.join(visitorId);
+    console.log(`👤 Visitor ${visitorId} joined room`);
+  });
+
+  // ✅ Visitor sends message
   socket.on('visitor-message', async (data) => {
     try {
-      const { visitorId, name, email, message } = data;
+      const { visitorId, name, message } = data;
       
+      if (!visitorId || !message) return;
+      
+      // Save message
       const newMessage = await ChatMessage.create({
         visitorId,
         name: name || 'Guest',
-        email: email || '',
         message,
         isFromAdmin: false,
         isRead: false
       });
       
-      await ChatSession.findOneAndUpdate(
+      // Update session
+      const session = await ChatSession.findOneAndUpdate(
         { visitorId },
         {
-          visitorId,
-          name: name || 'Guest',
-          email: email || '',
-          isActive: true,
-          lastMessageAt: new Date(),
-          $inc: { unreadCount: 1 }
+          $set: { 
+            lastMessageAt: new Date(),
+            name: name || 'Guest',
+            isActive: true
+          },
+          $inc: { 
+            unreadCount: 1,
+            totalMessages: 1
+          }
         },
-        { upsert: true }
+        { upsert: true, new: true }
       );
       
+      // Emit to admin
       io.emit('new-message', {
         visitorId,
         name: name || 'Guest',
         message,
         timestamp: newMessage.timestamp,
-        isFromAdmin: false
+        isFromAdmin: false,
+        session: session
       });
       
+      // Emit unread count
       const unreadCount = await ChatMessage.countDocuments({ isRead: false, isFromAdmin: false });
       io.emit('unread-update', { unread: unreadCount });
       
     } catch (error) {
-      console.error('❌ Error saving message:', error);
+      console.error('❌ Socket error:', error);
     }
   });
 
+  // ✅ Admin sends message
   socket.on('admin-message', async (data) => {
     try {
       const { visitorId, message } = data;
+      
+      if (!visitorId || !message) return;
       
       const settings = await Settings.findOne();
       const adminName = settings?.adminName || 'Support Team';
@@ -337,9 +543,13 @@ io.on('connection', (socket) => {
       
       await ChatSession.findOneAndUpdate(
         { visitorId },
-        { lastMessageAt: new Date() }
+        {
+          $set: { lastMessageAt: new Date() },
+          $inc: { totalMessages: 1 }
+        }
       );
       
+      // Emit to visitor
       io.to(visitorId).emit('admin-reply', {
         message,
         adminName,
@@ -347,13 +557,8 @@ io.on('connection', (socket) => {
       });
       
     } catch (error) {
-      console.error('❌ Error sending admin message:', error);
+      console.error('❌ Socket admin error:', error);
     }
-  });
-
-  socket.on('join-room', (visitorId) => {
-    socket.join(visitorId);
-    console.log(`👤 Visitor ${visitorId} joined room`);
   });
 
   socket.on('disconnect', () => {
@@ -362,18 +567,14 @@ io.on('connection', (socket) => {
 });
 
 // ============ ROUTES ============
-
-// ✅ Landing page
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-// ✅ Support page
 app.get('/support', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'support.html'));
 });
 
-// ✅ Admin page
 app.get('/blazesupport', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'admin.html'));
 });
