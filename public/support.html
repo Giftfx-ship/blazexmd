@@ -528,7 +528,17 @@
     <script src="/socket.io/socket.io.js"></script>
     <script>
         // ============ CONFIG ============
-        const PAIR_SITE_URL = 'https://blaze.zone.id';
+        // ✅ Visitor ID stored in localStorage - PERSISTENT!
+        let visitorId = localStorage.getItem('blaze_visitor_id');
+        if (!visitorId) {
+            visitorId = 'visitor_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6);
+            localStorage.setItem('blaze_visitor_id', visitorId);
+        }
+
+        let visitorName = 'Guest';
+        let adminName = 'Support Team';
+        let isOnline = true;
+        let messagesLoaded = false;
 
         // ============ DOM REFS ============
         const messages = document.getElementById('messages');
@@ -543,18 +553,6 @@
 
         // ============ SOCKET.IO ============
         const socket = io();
-
-        // Generate visitor ID
-        let visitorId = localStorage.getItem('visitorId');
-        if (!visitorId) {
-            visitorId = 'visitor_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6);
-            localStorage.setItem('visitorId', visitorId);
-        }
-
-        let visitorName = 'Guest';
-        let adminName = 'Support Team';
-        let isOnline = true;
-        let messagesLoaded = false;
 
         // ============ FETCH SETTINGS ============
         async function fetchSettings() {
@@ -644,11 +642,12 @@
             scrollToBottom();
         }
 
-        // ============ LOAD MESSAGE HISTORY ============
+        // ============ LOAD MESSAGE HISTORY FROM DATABASE ============
         async function loadMessageHistory() {
             try {
                 const res = await fetch(`/api/chat/messages/${visitorId}`);
                 const data = await res.json();
+                
                 if (data.messages && data.messages.length > 0) {
                     emptyMessages.style.display = 'none';
                     data.messages.forEach(msg => {
@@ -656,7 +655,16 @@
                         const adminNameText = msg.adminName || 'Support Team';
                         addMessage(msg.message, isAdmin, adminNameText);
                     });
+                    console.log(`✅ Loaded ${data.messages.length} messages from database`);
+                } else {
+                    console.log('📭 No messages found for this visitor');
                 }
+                
+                // ✅ Set visitor name from session if available
+                if (data.session && data.session.name && data.session.name !== 'Guest') {
+                    visitorName = data.session.name;
+                }
+                
                 messagesLoaded = true;
             } catch (error) {
                 console.error('Error loading message history:', error);
@@ -673,14 +681,41 @@
                 return;
             }
 
+            // Get user name if they entered one
+            const name = visitorName || 'Guest';
+
             chatSendBtn.disabled = true;
             chatSendBtn.textContent = 'Sending...';
 
+            // ✅ Add user message to UI
             addMessage(message, false);
 
+            // ✅ Send to server (saves to database)
+            try {
+                const res = await fetch('/api/chat/send', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        visitorId: visitorId,
+                        name: name,
+                        message: message
+                    })
+                });
+
+                const data = await res.json();
+                if (!data.success) {
+                    console.error('❌ Failed to save message:', data.error);
+                    showToast('⚠️ Message not saved. Please try again.', 'error');
+                }
+            } catch (error) {
+                console.error('❌ Error sending message:', error);
+                showToast('⚠️ Error sending message. Please try again.', 'error');
+            }
+
+            // ✅ Also emit via socket for real-time
             socket.emit('visitor-message', {
                 visitorId,
-                name: visitorName,
+                name: name,
                 message
             });
 
@@ -688,6 +723,66 @@
             chatSendBtn.disabled = false;
             chatSendBtn.textContent = 'Send';
         }
+
+        // ============ TOAST ============
+        function showToast(message, type = 'info') {
+            const toast = document.getElementById('toast');
+            if (!toast) {
+                // Create toast if it doesn't exist
+                const newToast = document.createElement('div');
+                newToast.id = 'toast';
+                newToast.className = 'toast';
+                newToast.textContent = message;
+                document.body.appendChild(newToast);
+                setTimeout(() => {
+                    newToast.classList.add('show');
+                    setTimeout(() => {
+                        newToast.classList.remove('show');
+                    }, 3000);
+                }, 100);
+                return;
+            }
+            toast.textContent = message;
+            toast.className = 'toast ' + type + ' show';
+            clearTimeout(toast._timeout);
+            toast._timeout = setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+
+        // Add toast styles
+        const toastStyle = document.createElement('style');
+        toastStyle.textContent = `
+            .toast {
+                position: fixed;
+                bottom: 24px;
+                left: 50%;
+                transform: translateX(-50%) translateY(100px);
+                background: var(--card);
+                color: var(--text);
+                padding: 12px 24px;
+                border-radius: var(--radius);
+                border: 1px solid var(--border);
+                font-size: 14px;
+                font-weight: 500;
+                z-index: 999;
+                opacity: 0;
+                transition: all 0.4s ease;
+                max-width: 90%;
+                text-align: center;
+            }
+            .toast.show {
+                opacity: 1;
+                transform: translateX(-50%) translateY(0);
+            }
+            .toast.error {
+                border-color: #DC2626;
+            }
+            .toast.success {
+                border-color: var(--success);
+            }
+        `;
+        document.head.appendChild(toastStyle);
 
         // ============ SOCKET EVENTS ============
         socket.on('connect', () => {
@@ -700,6 +795,25 @@
 
         socket.on('admin-reply', (data) => {
             addMessage(data.message, true, data.adminName);
+            // ✅ Also save to database via API
+            // The admin reply is already saved in database by the server
+        });
+
+        socket.on('message-deleted', (data) => {
+            if (data.visitorId === visitorId) {
+                // Reload messages to reflect deletion
+                loadMessageHistory();
+            }
+        });
+
+        socket.on('session-cleared', (data) => {
+            if (data.visitorId === visitorId) {
+                // Clear all messages from UI
+                messages.innerHTML = '';
+                emptyMessages.style.display = 'block';
+                // Reload to confirm
+                loadMessageHistory();
+            }
         });
 
         socket.on('disconnect', () => {
@@ -713,17 +827,23 @@
         });
 
         // ============ INIT ============
-        fetchSettings();
-        fetchSupportNumbers();
+        async function init() {
+            await fetchSettings();
+            await fetchSupportNumbers();
+            
+            // Show welcome message only if no messages
+            setTimeout(() => {
+                if (messages.children.length === 0) {
+                    addMessage('👋 Welcome! How can we help you today?', true, 'Support Team');
+                }
+            }, 500);
+        }
 
-        setTimeout(() => {
-            if (messages.children.length === 0) {
-                addMessage('👋 Welcome! How can we help you today?', true, 'Support Team');
-            }
-        }, 800);
+        init();
 
         console.log('🚀 BLAZE-XMD Support Chat loaded');
         console.log('👤 Visitor ID:', visitorId);
+        console.log('💾 Messages will be saved to database');
     </script>
 </body>
 </html>
