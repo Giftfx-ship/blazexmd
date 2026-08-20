@@ -115,23 +115,9 @@
             text-align: center;
         }
 
-        .email-card .icon {
-            font-size: 48px;
-            margin-bottom: 12px;
-        }
-
-        .email-card h2 {
-            font-size: 24px;
-            font-weight: 800;
-            margin-bottom: 8px;
-        }
-
-        .email-card p {
-            color: var(--muted);
-            font-size: 14px;
-            margin-bottom: 24px;
-        }
-
+        .email-card .icon { font-size: 48px; margin-bottom: 12px; }
+        .email-card h2 { font-size: 24px; font-weight: 800; margin-bottom: 8px; }
+        .email-card p { color: var(--muted); font-size: 14px; margin-bottom: 24px; }
         .email-card input {
             width: 100%;
             padding: 12px 16px;
@@ -145,11 +131,7 @@
             transition: border-color var(--transition);
             margin-bottom: 12px;
         }
-
-        .email-card input:focus {
-            border-color: var(--primary);
-        }
-
+        .email-card input:focus { border-color: var(--primary); }
         .email-card .btn {
             width: 100%;
             padding: 12px;
@@ -163,12 +145,10 @@
             transition: all var(--transition);
             font-family: inherit;
         }
-
         .email-card .btn:hover {
             background: var(--primary-teal);
             transform: translateY(-2px);
         }
-
         .email-error {
             color: #DC2626;
             font-size: 13px;
@@ -546,6 +526,31 @@
         const supportNumbers = document.getElementById('supportNumbers');
         const emptySupport = document.getElementById('emptySupport');
 
+        // ============ LOCAL STORAGE FUNCTIONS ============
+        function getSavedEmail() {
+            return localStorage.getItem('blaze_user_email') || null;
+        }
+
+        function getSavedVisitorId() {
+            return localStorage.getItem('blaze_visitor_id') || null;
+        }
+
+        function getSavedName() {
+            return localStorage.getItem('blaze_user_name') || null;
+        }
+
+        function saveChatSession(email, vid, name) {
+            localStorage.setItem('blaze_user_email', email);
+            localStorage.setItem('blaze_visitor_id', vid);
+            if (name) localStorage.setItem('blaze_user_name', name);
+        }
+
+        function clearChatSession() {
+            localStorage.removeItem('blaze_user_email');
+            localStorage.removeItem('blaze_visitor_id');
+            localStorage.removeItem('blaze_user_name');
+        }
+
         // ============ TOAST ============
         function showToast(message, type = 'info') {
             let toast = document.getElementById('toast');
@@ -561,6 +566,46 @@
             toast._timeout = setTimeout(() => {
                 toast.classList.remove('show');
             }, 3000);
+        }
+
+        // ============ CHECK FOR EXISTING SESSION ============
+        async function checkExistingSession() {
+            const savedEmail = getSavedEmail();
+            const savedVisitorId = getSavedVisitorId();
+            const savedName = getSavedName();
+
+            if (savedEmail && savedVisitorId) {
+                visitorId = savedVisitorId;
+                userEmail = savedEmail;
+                userName = savedName || savedEmail.split('@')[0] || 'Guest';
+
+                // Verify session still exists
+                try {
+                    const res = await fetch(`/api/chat/messages/${visitorId}`);
+                    const data = await res.json();
+                    if (data.session) {
+                        // Existing session found - skip email step
+                        emailContainer.style.display = 'none';
+                        chatContainer.classList.add('active');
+                        
+                        connectSocket();
+                        await loadMessageHistory();
+
+                        chatInput.disabled = false;
+                        chatSendBtn.disabled = false;
+                        chatInput.placeholder = 'Type your message...';
+
+                        console.log('✅ Restored existing session:', userEmail);
+                        return;
+                    }
+                } catch (error) {
+                    console.log('No existing session found');
+                }
+            }
+            
+            // No session - show email form
+            emailContainer.style.display = 'flex';
+            chatContainer.classList.remove('active');
         }
 
         // ============ START CHAT ============
@@ -589,10 +634,8 @@
                     userEmail = email;
                     userName = name;
 
-                    // Save to localStorage
-                    localStorage.setItem('blaze_visitor_id', visitorId);
-                    localStorage.setItem('blaze_user_email', email);
-                    localStorage.setItem('blaze_user_name', name);
+                    // ✅ Save to localStorage
+                    saveChatSession(email, visitorId, name);
 
                     // Show chat
                     emailContainer.style.display = 'none';
@@ -836,46 +879,6 @@
         chatInput.addEventListener('keydown', (e) => {
             if (e.key === 'Enter') sendMessage();
         });
-
-        // ============ CHECK FOR EXISTING SESSION ============
-        async function checkExistingSession() {
-            const savedVisitorId = localStorage.getItem('blaze_visitor_id');
-            const savedEmail = localStorage.getItem('blaze_user_email');
-            const savedName = localStorage.getItem('blaze_user_name');
-
-            if (savedVisitorId && savedEmail) {
-                visitorId = savedVisitorId;
-                userEmail = savedEmail;
-                userName = savedName || savedEmail.split('@')[0] || 'Guest';
-
-                // Verify session still exists
-                try {
-                    const res = await fetch(`/api/chat/messages/${visitorId}`);
-                    const data = await res.json();
-                    if (data.session) {
-                        // Existing session found - skip email step
-                        emailContainer.style.display = 'none';
-                        chatContainer.classList.add('active');
-                        
-                        connectSocket();
-                        await loadMessageHistory();
-
-                        chatInput.disabled = false;
-                        chatSendBtn.disabled = false;
-                        chatInput.placeholder = 'Type your message...';
-
-                        console.log('✅ Restored existing session:', userEmail);
-                        return;
-                    }
-                } catch (error) {
-                    console.log('No existing session found');
-                }
-            }
-            
-            // No session - show email form
-            emailContainer.style.display = 'flex';
-            chatContainer.classList.remove('active');
-        }
 
         // ============ INIT ============
         async function init() {
