@@ -42,7 +42,7 @@ mongoose.connect(process.env.MONGODB_URI, {
 // Chat Message Schema
 const ChatMessageSchema = new mongoose.Schema({
   visitorId: { type: String, required: true, index: true },
-  email: { type: String, default: '' },
+  email: { type: String, required: true, index: true },
   name: { type: String, default: 'Guest' },
   message: { type: String, required: true },
   isFromAdmin: { type: Boolean, default: false },
@@ -227,7 +227,35 @@ app.delete('/api/admin/support/:id', authenticate, async (req, res) => {
 
 // ============ CHAT API ROUTES ============
 
-// Get or create session by email
+// ✅ Check if email exists
+app.post('/api/chat/check-email', async (req, res) => {
+  try {
+    const { email } = req.body;
+    
+    if (!email) {
+      return res.status(400).json({ error: 'Email required' });
+    }
+    
+    const visitorId = 'user_' + email.toLowerCase().replace(/[^a-zA-Z0-9]/g, '_');
+    const session = await ChatSession.findOne({ visitorId });
+    
+    if (session) {
+      const messages = await ChatMessage.find({ visitorId }).sort({ timestamp: 1 });
+      return res.json({ 
+        exists: true, 
+        session, 
+        messages,
+        totalMessages: messages.length 
+      });
+    } else {
+      return res.json({ exists: false });
+    }
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// ✅ Create new session (deletes old one if exists)
 app.post('/api/chat/session', async (req, res) => {
   try {
     const { email, name } = req.body;
@@ -236,35 +264,33 @@ app.post('/api/chat/session', async (req, res) => {
       return res.status(400).json({ error: 'Email required' });
     }
     
-    const visitorId = 'user_' + email.replace(/[^a-zA-Z0-9]/g, '_');
+    const visitorId = 'user_' + email.toLowerCase().replace(/[^a-zA-Z0-9]/g, '_');
     
-    let session = await ChatSession.findOne({ visitorId });
+    // ✅ Delete old session and messages if they exist
+    await ChatSession.deleteOne({ visitorId });
+    await ChatMessage.deleteMany({ visitorId });
     
-    if (!session) {
-      session = await ChatSession.create({
-        visitorId,
-        email: email.toLowerCase(),
-        name: name || email.split('@')[0] || 'Guest',
-        isActive: true,
-        lastMessageAt: new Date(),
-        unreadCount: 0,
-        totalMessages: 0
-      });
-      console.log(`✅ New session created: ${email}`);
-    } else {
-      if (name && session.name === 'Guest') {
-        session.name = name;
-        await session.save();
-      }
-    }
+    // ✅ Create new session
+    const session = await ChatSession.create({
+      visitorId,
+      email: email.toLowerCase(),
+      name: name || email.split('@')[0] || 'Guest',
+      isActive: true,
+      lastMessageAt: new Date(),
+      unreadCount: 0,
+      totalMessages: 0
+    });
     
-    res.json({ session, visitorId });
+    console.log(`✅ New session created for: ${email}`);
+    
+    res.json({ success: true, session, visitorId, isNew: true });
   } catch (error) {
+    console.error('❌ Error creating session:', error);
     res.status(500).json({ error: error.message });
   }
 });
 
-// Get messages by visitorId
+// ✅ Get messages by visitorId
 app.get('/api/chat/messages/:visitorId', async (req, res) => {
   try {
     const { visitorId } = req.params;
@@ -276,7 +302,7 @@ app.get('/api/chat/messages/:visitorId', async (req, res) => {
   }
 });
 
-// Send message (visitor)
+// ✅ Send message (visitor)
 app.post('/api/chat/send', async (req, res) => {
   try {
     const { visitorId, name, email, message } = req.body;
