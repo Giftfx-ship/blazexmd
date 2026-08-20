@@ -1,460 +1,380 @@
+require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
-const http = require('http');
-const socketIo = require('socket.io');
+const cors = require('cors');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const cors = require('cors');
-const helmet = require('helmet');
-const compression = require('compression');
+const rateLimit = require('express-rate-limit');
 const path = require('path');
-require('dotenv').config();
+const http = require('http');
+const socketIO = require('socket.io');
 
 const app = express();
 const server = http.createServer(app);
-const io = socketIo(server, {
-    cors: {
-        origin: "*",
-        methods: ["GET", "POST"]
-    }
+const io = socketIO(server, {
+  cors: {
+    origin: "*",
+    methods: ["GET", "POST"]
+  }
 });
 
-app.use(helmet({
-    contentSecurityPolicy: false,
-}));
+// Middleware
 app.use(cors());
-app.use(compression());
 app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-app.use(express.static('public'));
+app.use(express.static(path.join(__dirname, 'public')));
 
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 100
+});
+app.use('/api/', limiter);
+
+// Database
 mongoose.connect(process.env.MONGODB_URI, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
 })
-.then(() => console.log('MongoDB Connected Successfully'))
-.catch(err => console.error('MongoDB Connection Error:', err));
+.then(() => console.log('✅ Database Connected'))
+.catch(err => console.error('❌ Database Error:', err));
 
 // ============ MODELS ============
 
-const MessageSchema = new mongoose.Schema({
-    userId: { type: String, required: true },
-    userName: { type: String, required: true },
-    userEmail: { type: String, default: '' },
-    message: { type: String, required: true },
-    timestamp: { type: Date, default: Date.now },
-    isRead: { type: Boolean, default: false },
-    isDeleted: { type: Boolean, default: false },
-    isAdminReply: { type: Boolean, default: false },
-    room: { type: String, default: 'general' }
+const ChatMessageSchema = new mongoose.Schema({
+  visitorId: { type: String, required: true },
+  name: { type: String, default: 'Guest' },
+  email: { type: String, default: '' },
+  message: { type: String, required: true },
+  isFromAdmin: { type: Boolean, default: false },
+  adminName: { type: String, default: 'Support Team' },
+  isRead: { type: Boolean, default: false },
+  timestamp: { type: Date, default: Date.now }
+});
+
+const ChatSessionSchema = new mongoose.Schema({
+  visitorId: { type: String, required: true, unique: true },
+  name: { type: String, default: 'Guest' },
+  email: { type: String, default: '' },
+  isActive: { type: Boolean, default: true },
+  lastMessageAt: { type: Date, default: Date.now },
+  unreadCount: { type: Number, default: 0 }
+});
+
+const SupportSchema = new mongoose.Schema({
+  name: { type: String, required: true },
+  phone: { type: String, required: true },
+  countryCode: { type: String, required: true },
+  countryFlag: { type: String, required: true },
+  isActive: { type: Boolean, default: true }
+});
+
+const SettingsSchema = new mongoose.Schema({
+  isOnline: { type: Boolean, default: true },
+  adminName: { type: String, default: 'Support Team' },
+  welcomeMessage: { type: String, default: 'Hello! How can I help you?' }
 });
 
 const AdminSchema = new mongoose.Schema({
-    username: { type: String, required: true, unique: true },
-    password: { type: String, required: true },
-    isOnline: { type: Boolean, default: false },
-    lastActive: { type: Date, default: Date.now },
-    createdAt: { type: Date, default: Date.now }
+  username: { type: String, required: true, unique: true },
+  password: { type: String, required: true }
 });
 
-const SupportNumberSchema = new mongoose.Schema({
-    name: { type: String, required: true },
-    country: { type: String, required: true },
-    flag: { type: String, required: true },
-    number: { type: String, required: true },
-    isActive: { type: Boolean, default: true },
-    priority: { type: Number, default: 1 },
-    whatsappLink: { type: String, default: '' }
-});
-
-const BotFeatureSchema = new mongoose.Schema({
-    name: { type: String, required: true },
-    description: { type: String, required: true },
-    icon: { type: String, required: true },
-    isActive: { type: Boolean, default: true },
-    priority: { type: Number, default: 1 }
-});
-
-const Message = mongoose.model('Message', MessageSchema);
+const ChatMessage = mongoose.model('ChatMessage', ChatMessageSchema);
+const ChatSession = mongoose.model('ChatSession', ChatSessionSchema);
+const Support = mongoose.model('Support', SupportSchema);
+const Settings = mongoose.model('Settings', SettingsSchema);
 const Admin = mongoose.model('Admin', AdminSchema);
-const SupportNumber = mongoose.model('SupportNumber', SupportNumberSchema);
-const BotFeature = mongoose.model('BotFeature', BotFeatureSchema);
 
-// ============ INITIALIZE DATA ============
-
-async function initializeAdmin() {
-    try {
-        const adminExists = await Admin.findOne({ username: process.env.ADMIN_USERNAME });
-        if (!adminExists) {
-            const hashedPassword = await bcrypt.hash(process.env.ADMIN_PASSWORD, 10);
-            const admin = new Admin({
-                username: process.env.ADMIN_USERNAME,
-                password: hashedPassword,
-                isOnline: false
-            });
-            await admin.save();
-            console.log('Admin user created successfully');
-        }
-    } catch (error) {
-        console.error('Error creating admin:', error);
-    }
-}
-
-async function initializeFeatures() {
-    try {
-        const count = await BotFeature.countDocuments();
-        if (count === 0) {
-            const features = [
-                { 
-                    name: 'Auto View Status', 
-                    description: 'Automatically views all WhatsApp statuses from your contacts', 
-                    icon: 'fa-eye',
-                    priority: 1 
-                },
-                { 
-                    name: 'Anti-Delete', 
-                    description: 'View deleted messages instantly even after sender removes them', 
-                    icon: 'fa-trash-alt',
-                    priority: 2 
-                },
-                { 
-                    name: 'Auto-Reply', 
-                    description: 'Smart automated replies to messages with custom responses', 
-                    icon: 'fa-robot',
-                    priority: 3 
-                },
-                { 
-                    name: 'Group Management', 
-                    description: 'Auto-moderation and group management tools', 
-                    icon: 'fa-users',
-                    priority: 4 
-                },
-                { 
-                    name: 'Broadcast', 
-                    description: 'Send messages to all contacts with one click', 
-                    icon: 'fa-bullhorn',
-                    priority: 5 
-                },
-                { 
-                    name: 'Download Media', 
-                    description: 'Save statuses, images, videos and more', 
-                    icon: 'fa-download',
-                    priority: 6 
-                },
-                { 
-                    name: 'Voice Notes', 
-                    description: 'Auto-transcribe voice notes to text', 
-                    icon: 'fa-microphone',
-                    priority: 7 
-                }
-            ];
-            await BotFeature.insertMany(features);
-            console.log('Bot features initialized');
-        }
-    } catch (error) {
-        console.error('Error initializing features:', error);
-    }
-}
-
-initializeAdmin();
-initializeFeatures();
-
-// ============ AUTH MIDDLEWARE ============
-const authenticateAdmin = async (req, res, next) => {
-    const token = req.headers['authorization']?.split(' ')[1];
-    if (!token) {
-        return res.status(401).json({ error: 'No token provided' });
-    }
-
-    try {
-        const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        const admin = await Admin.findById(decoded.id);
-        if (!admin) {
-            return res.status(401).json({ error: 'Invalid token' });
-        }
-        req.admin = admin;
-        next();
-    } catch (error) {
-        return res.status(401).json({ error: 'Invalid token' });
-    }
+// ============ AUTH ============
+const authenticate = async (req, res, next) => {
+  try {
+    const token = req.header('Authorization')?.replace('Bearer ', '');
+    if (!token) throw new Error();
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const admin = await Admin.findById(decoded.id);
+    if (!admin) throw new Error();
+    req.admin = admin;
+    next();
+  } catch (error) {
+    res.status(401).json({ error: 'Please authenticate' });
+  }
 };
+
+// ============ INITIALIZE ============
+(async () => {
+  const existingAdmin = await Admin.findOne({ username: process.env.ADMIN_USERNAME });
+  if (!existingAdmin) {
+    const hashedPassword = await bcrypt.hash(process.env.ADMIN_PASSWORD, 10);
+    await Admin.create({
+      username: process.env.ADMIN_USERNAME,
+      password: hashedPassword
+    });
+    console.log('✅ Admin created');
+  }
+
+  const existingSettings = await Settings.findOne();
+  if (!existingSettings) {
+    await Settings.create({
+      isOnline: true,
+      adminName: 'Support Team',
+      welcomeMessage: 'Hello! How can I help you?'
+    });
+    console.log('✅ Settings created');
+  }
+})();
 
 // ============ API ROUTES ============
 
+// Admin Login
 app.post('/api/admin/login', async (req, res) => {
-    try {
-        const { username, password } = req.body;
-        const admin = await Admin.findOne({ username });
-
-        if (!admin) {
-            return res.status(401).json({ error: 'Invalid credentials' });
-        }
-
-        const isValidPassword = await bcrypt.compare(password, admin.password);
-        if (!isValidPassword) {
-            return res.status(401).json({ error: 'Invalid credentials' });
-        }
-
-        const token = jwt.sign(
-            { id: admin._id, username: admin.username },
-            process.env.JWT_SECRET,
-            { expiresIn: '24h' }
-        );
-
-        res.json({
-            success: true,
-            token,
-            admin: {
-                id: admin._id,
-                username: admin.username,
-                isOnline: admin.isOnline
-            }
-        });
-    } catch (error) {
-        res.status(500).json({ error: error.message });
-    }
+  try {
+    const { username, password } = req.body;
+    const admin = await Admin.findOne({ username });
+    if (!admin) return res.status(401).json({ error: 'Invalid credentials' });
+    
+    const isValid = await bcrypt.compare(password, admin.password);
+    if (!isValid) return res.status(401).json({ error: 'Invalid credentials' });
+    
+    const token = jwt.sign({ id: admin._id }, process.env.JWT_SECRET, { expiresIn: '7d' });
+    res.json({ token, username: admin.username });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
 });
 
-app.get('/api/support/numbers', async (req, res) => {
-    try {
-        const numbers = await SupportNumber.find({ isActive: true })
-            .sort({ priority: 1 });
-        res.json(numbers);
-    } catch (error) {
-        res.status(500).json({ error: error.message });
-    }
+// Get settings
+app.get('/api/settings', async (req, res) => {
+  try {
+    const settings = await Settings.findOne();
+    res.json(settings);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
 });
 
-app.get('/api/features', async (req, res) => {
-    try {
-        const features = await BotFeature.find({ isActive: true })
-            .sort({ priority: 1 });
-        res.json(features);
-    } catch (error) {
-        res.status(500).json({ error: error.message });
-    }
+// Update settings (admin only)
+app.post('/api/admin/settings', authenticate, async (req, res) => {
+  try {
+    const { isOnline, adminName, welcomeMessage } = req.body;
+    const settings = await Settings.findOneAndUpdate(
+      {},
+      { isOnline, adminName, welcomeMessage },
+      { new: true, upsert: true }
+    );
+    res.json(settings);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
 });
 
-app.get('/api/admin/status', async (req, res) => {
-    try {
-        const admin = await Admin.findOne({ username: process.env.ADMIN_USERNAME });
-        res.json({
-            isOnline: admin?.isOnline || false,
-            lastActive: admin?.lastActive
-        });
-    } catch (error) {
-        res.status(500).json({ error: error.message });
-    }
+// Get support numbers
+app.get('/api/support', async (req, res) => {
+  try {
+    const supports = await Support.find({ isActive: true });
+    res.json(supports);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
 });
 
-app.get('/api/pair/redirect', (req, res) => {
-    res.json({ 
-        url: process.env.PAIR_SITE_URL || 'https://blaze.zone.id'
-    });
+// Add support number (admin only)
+app.post('/api/admin/support', authenticate, async (req, res) => {
+  try {
+    const { name, phone, countryCode, countryFlag } = req.body;
+    const support = await Support.create({ name, phone, countryCode, countryFlag });
+    res.json(support);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
 });
 
-app.get('/api/admin/messages', authenticateAdmin, async (req, res) => {
-    try {
-        const { page = 1, limit = 50 } = req.query;
-        const skip = (page - 1) * limit;
-
-        const messages = await Message.find({ isDeleted: false })
-            .sort({ timestamp: -1 })
-            .skip(skip)
-            .limit(parseInt(limit));
-
-        const total = await Message.countDocuments({ isDeleted: false });
-
-        res.json({
-            messages,
-            total,
-            page: parseInt(page),
-            totalPages: Math.ceil(total / limit)
-        });
-    } catch (error) {
-        res.status(500).json({ error: error.message });
-    }
+// Edit support number (admin only)
+app.put('/api/admin/support/:id', authenticate, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { name, phone, countryCode, countryFlag, isActive } = req.body;
+    const support = await Support.findByIdAndUpdate(
+      id,
+      { name, phone, countryCode, countryFlag, isActive },
+      { new: true }
+    );
+    res.json(support);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
 });
 
-app.post('/api/admin/reply', authenticateAdmin, async (req, res) => {
-    try {
-        const { userId, message } = req.body;
-
-        if (!userId || !message) {
-            return res.status(400).json({ error: 'Missing required fields' });
-        }
-
-        const newMessage = new Message({
-            userId,
-            userName: 'Admin',
-            userEmail: 'admin@blazexmd.com',
-            message,
-            isAdminReply: true,
-            isRead: true
-        });
-
-        await newMessage.save();
-
-        io.to(userId).emit('admin-reply', {
-            message: newMessage,
-            timestamp: newMessage.timestamp
-        });
-
-        res.json({
-            success: true,
-            message: newMessage
-        });
-    } catch (error) {
-        res.status(500).json({ error: error.message });
-    }
+// Delete support number (admin only)
+app.delete('/api/admin/support/:id', authenticate, async (req, res) => {
+  try {
+    const { id } = req.params;
+    await Support.findByIdAndDelete(id);
+    res.json({ success: true });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
 });
 
-app.delete('/api/admin/message/:id', authenticateAdmin, async (req, res) => {
-    try {
-        const message = await Message.findById(req.params.id);
-        if (!message) {
-            return res.status(404).json({ error: 'Message not found' });
-        }
-
-        message.isDeleted = true;
-        await message.save();
-
-        res.json({ success: true, message: 'Message deleted successfully' });
-    } catch (error) {
-        res.status(500).json({ error: error.message });
-    }
+// Get chat sessions (admin only)
+app.get('/api/admin/sessions', authenticate, async (req, res) => {
+  try {
+    const sessions = await ChatSession.find().sort({ lastMessageAt: -1 });
+    res.json({ sessions });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
 });
 
-app.put('/api/admin/status', authenticateAdmin, async (req, res) => {
-    try {
-        const { isOnline } = req.body;
-        const admin = await Admin.findById(req.admin._id);
-        admin.isOnline = isOnline;
-        admin.lastActive = new Date();
-        await admin.save();
-
-        io.emit('admin-status-change', { isOnline });
-
-        res.json({ success: true, isOnline });
-    } catch (error) {
-        res.status(500).json({ error: error.message });
-    }
+// Get messages for a session (admin only)
+app.get('/api/admin/session/:visitorId/messages', authenticate, async (req, res) => {
+  try {
+    const { visitorId } = req.params;
+    const messages = await ChatMessage.find({ visitorId }).sort({ timestamp: 1 });
+    
+    await ChatMessage.updateMany(
+      { visitorId, isRead: false },
+      { isRead: true }
+    );
+    
+    await ChatSession.findOneAndUpdate(
+      { visitorId },
+      { unreadCount: 0 }
+    );
+    
+    res.json({ messages });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
 });
 
-app.get('/api/admin/stats', authenticateAdmin, async (req, res) => {
-    try {
-        const totalMessages = await Message.countDocuments({ isDeleted: false });
-        const totalUsers = await Message.distinct('userId');
-        const admin = await Admin.findOne({ username: process.env.ADMIN_USERNAME });
-
-        res.json({
-            totalMessages,
-            totalUsers: totalUsers.length,
-            adminOnline: admin?.isOnline || false
-        });
-    } catch (error) {
-        res.status(500).json({ error: error.message });
-    }
+// Get unread count (admin only)
+app.get('/api/admin/unread-count', authenticate, async (req, res) => {
+  try {
+    const count = await ChatMessage.countDocuments({ isRead: false, isFromAdmin: false });
+    res.json({ unread: count });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
 });
 
-app.post('/api/admin/support/numbers', authenticateAdmin, async (req, res) => {
-    try {
-        const { name, country, flag, number, priority, whatsappLink } = req.body;
-        
-        if (!name || !country || !flag || !number) {
-            return res.status(400).json({ error: 'Name, country, flag and number required' });
-        }
-
-        const newNumber = new SupportNumber({
-            name,
-            country,
-            flag,
-            number,
-            priority: priority || 1,
-            whatsappLink: whatsappLink || `https://wa.me/${number.replace(/[^0-9]/g, '')}`
-        });
-
-        await newNumber.save();
-        res.json({ success: true, number: newNumber });
-    } catch (error) {
-        res.status(500).json({ error: error.message });
-    }
-});
-
-app.delete('/api/admin/support/numbers/:id', authenticateAdmin, async (req, res) => {
-    try {
-        await SupportNumber.findByIdAndDelete(req.params.id);
-        res.json({ success: true });
-    } catch (error) {
-        res.status(500).json({ error: error.message });
-    }
-});
-
-app.put('/api/admin/feature/:id', authenticateAdmin, async (req, res) => {
-    try {
-        const { isActive } = req.body;
-        const feature = await BotFeature.findByIdAndUpdate(
-            req.params.id,
-            { isActive },
-            { new: true }
-        );
-        if (!feature) {
-            return res.status(404).json({ error: 'Feature not found' });
-        }
-        res.json({ success: true, feature });
-    } catch (error) {
-        res.status(500).json({ error: error.message });
-    }
+// Delete message (admin only)
+app.delete('/api/admin/message/:id', authenticate, async (req, res) => {
+  try {
+    const { id } = req.params;
+    await ChatMessage.findByIdAndDelete(id);
+    res.json({ success: true });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
 });
 
 // ============ SOCKET.IO ============
+
 io.on('connection', (socket) => {
-    console.log('New client connected:', socket.id);
+  console.log('🔌 New connection:', socket.id);
 
-    socket.on('join', (userId) => {
-        socket.join(userId);
-        console.log('User joined room:', userId);
-    });
+  socket.on('visitor-message', async (data) => {
+    try {
+      const { visitorId, name, email, message } = data;
+      
+      const newMessage = await ChatMessage.create({
+        visitorId,
+        name: name || 'Guest',
+        email: email || '',
+        message,
+        isFromAdmin: false,
+        isRead: false
+      });
+      
+      await ChatSession.findOneAndUpdate(
+        { visitorId },
+        {
+          visitorId,
+          name: name || 'Guest',
+          email: email || '',
+          isActive: true,
+          lastMessageAt: new Date(),
+          $inc: { unreadCount: 1 }
+        },
+        { upsert: true }
+      );
+      
+      const settings = await Settings.findOne();
+      
+      io.emit('new-message', {
+        visitorId,
+        name: name || 'Guest',
+        message,
+        timestamp: newMessage.timestamp,
+        isFromAdmin: false
+      });
+      
+      const unreadCount = await ChatMessage.countDocuments({ isRead: false, isFromAdmin: false });
+      io.emit('unread-update', { unread: unreadCount });
+      
+    } catch (error) {
+      console.error('❌ Error saving message:', error);
+    }
+  });
 
-    socket.on('send-message', async (data) => {
-        try {
-            const { userId, userName, userEmail, message } = data;
-            
-            const newMessage = new Message({
-                userId,
-                userName,
-                userEmail,
-                message,
-                timestamp: new Date()
-            });
+  socket.on('admin-message', async (data) => {
+    try {
+      const { visitorId, message } = data;
+      
+      const settings = await Settings.findOne();
+      const adminName = settings?.adminName || 'Support Team';
+      
+      const newMessage = await ChatMessage.create({
+        visitorId,
+        message,
+        isFromAdmin: true,
+        adminName: adminName,
+        isRead: true
+      });
+      
+      await ChatSession.findOneAndUpdate(
+        { visitorId },
+        { lastMessageAt: new Date() }
+      );
+      
+      io.to(visitorId).emit('admin-reply', {
+        message,
+        adminName,
+        timestamp: newMessage.timestamp
+      });
+      
+    } catch (error) {
+      console.error('❌ Error sending admin message:', error);
+    }
+  });
 
-            await newMessage.save();
+  socket.on('join-room', (visitorId) => {
+    socket.join(visitorId);
+    console.log(`👤 Visitor ${visitorId} joined room`);
+  });
 
-            io.emit('new-message', newMessage);
-            socket.emit('message-sent', newMessage);
-        } catch (error) {
-            console.error('Error saving message:', error);
-        }
-    });
-
-    socket.on('disconnect', () => {
-        console.log('Client disconnected:', socket.id);
-    });
+  socket.on('disconnect', () => {
+    console.log('🔌 Disconnected:', socket.id);
+  });
 });
 
 // ============ SERVE FRONTEND ============
 app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'index.html'));
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-app.get('/blazesupportlol', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'blazesupportlol.html'));
+app.get('/support', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'support.html'));
+});
+
+app.get('/admin', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'admin.html'));
 });
 
 // ============ START SERVER ============
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
-    console.log('Blaze XMD Server running on port', PORT);
-    console.log('Visit: http://localhost:' + PORT);
-    console.log('Admin: http://localhost:' + PORT + '/blazesupportlol');
+  console.log(`🚀 Server running on http://localhost:${PORT}`);
+  console.log(`📱 Landing: http://localhost:${PORT}`);
+  console.log(`💬 Support: http://localhost:${PORT}/support`);
+  console.log(`🔐 Admin: http://localhost:${PORT}/admin`);
 });
