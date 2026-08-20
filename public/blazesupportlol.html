@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Blaze XMD Admin Panel</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <style>
         :root {
             --primary: #6C63FF;
@@ -54,9 +54,99 @@
             background: var(--bg);
             color: var(--text);
             transition: var(--transition);
+            min-height: 100vh;
         }
 
+        /* ===== FLOATING BACKGROUND ===== */
+        .floating-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            pointer-events: none;
+            overflow: hidden;
+        }
+
+        .floating-element {
+            position: absolute;
+            border-radius: 50%;
+            opacity: 0.12;
+            animation: floatElement 20s infinite ease-in-out;
+        }
+
+        .floating-element:nth-child(1) {
+            width: 400px;
+            height: 400px;
+            background: var(--primary);
+            top: -10%;
+            left: -10%;
+            animation-delay: 0s;
+            animation-duration: 25s;
+        }
+
+        .floating-element:nth-child(2) {
+            width: 350px;
+            height: 350px;
+            background: var(--secondary);
+            bottom: -10%;
+            right: -10%;
+            animation-delay: -7s;
+            animation-duration: 20s;
+        }
+
+        .floating-element:nth-child(3) {
+            width: 250px;
+            height: 250px;
+            background: var(--warning);
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            animation-delay: -14s;
+            animation-duration: 22s;
+        }
+
+        @keyframes floatElement {
+            0% { transform: translate(0, 0) scale(1) rotate(0deg); }
+            25% { transform: translate(80px, -80px) scale(1.2) rotate(45deg); }
+            50% { transform: translate(-60px, 60px) scale(0.8) rotate(90deg); }
+            75% { transform: translate(100px, 40px) scale(1.1) rotate(135deg); }
+            100% { transform: translate(-40px, -60px) scale(1) rotate(180deg); }
+        }
+
+        /* ===== PARTICLES ===== */
+        .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        .particle-float {
+            position: absolute;
+            width: 3px;
+            height: 3px;
+            background: var(--primary);
+            border-radius: 50%;
+            opacity: 0.3;
+            animation: particleFloat 15s infinite linear;
+        }
+
+        @keyframes particleFloat {
+            0% { transform: translateY(100vh) rotate(0deg); opacity: 0; }
+            10% { opacity: 0.3; }
+            90% { opacity: 0.3; }
+            100% { transform: translateY(-10vh) rotate(720deg); opacity: 0; }
+        }
+
+        /* ===== LOGIN ===== */
         .login-container {
+            position: relative;
+            z-index: 1;
             min-height: 100vh;
             display: flex;
             align-items: center;
@@ -67,23 +157,39 @@
         .login-box {
             background: var(--card);
             padding: 50px;
-            border-radius: 20px;
+            border-radius: 24px;
             border: 1px solid var(--glass-border);
             max-width: 420px;
             width: 100%;
             box-shadow: var(--shadow);
-            animation: fadeInUp 0.6s ease;
+            backdrop-filter: blur(20px);
         }
 
-        @keyframes fadeInUp {
-            from { opacity: 0; transform: translateY(30px); }
-            to { opacity: 1; transform: translateY(0); }
+        .login-box .logo-text {
+            text-align: center;
+            font-size: 36px;
+            font-weight: 900;
+            margin-bottom: 5px;
+        }
+
+        .login-box .logo-text .blaze {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .login-box .logo-sub {
+            text-align: center;
+            font-size: 14px;
+            color: var(--muted);
+            margin-bottom: 30px;
         }
 
         .login-box h1 {
             text-align: center;
-            font-size: 28px;
-            margin-bottom: 10px;
+            font-size: 24px;
+            margin-bottom: 5px;
         }
 
         .login-box .subtitle {
@@ -93,18 +199,15 @@
             margin-bottom: 30px;
         }
 
-        .login-box .logo-text {
-            text-align: center;
-            font-size: 32px;
-            font-weight: 800;
-            margin-bottom: 10px;
-        }
-
-        .login-box .logo-text .blaze {
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
+        .login-error {
+            background: rgba(255, 107, 107, 0.1);
+            border: 1px solid var(--secondary);
+            color: var(--secondary);
+            padding: 12px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            display: none;
+            font-size: 14px;
         }
 
         .form-group {
@@ -127,11 +230,13 @@
             color: var(--text);
             font-size: 15px;
             transition: var(--transition);
+            font-family: 'Poppins', sans-serif;
         }
 
         .form-group input:focus {
             outline: none;
             border-color: var(--primary);
+            box-shadow: 0 0 30px rgba(108,99,255,0.1);
         }
 
         .login-btn {
@@ -145,29 +250,23 @@
             font-weight: 600;
             cursor: pointer;
             transition: var(--transition);
+            font-family: 'Poppins', sans-serif;
         }
 
         .login-btn:hover {
             transform: translateY(-2px);
-            box-shadow: 0 4px 20px rgba(108, 99, 255, 0.4);
+            box-shadow: 0 8px 30px rgba(108,99,255,0.4);
         }
 
-        .login-error {
-            background: rgba(255, 107, 107, 0.1);
-            border: 1px solid var(--secondary);
-            color: var(--secondary);
-            padding: 12px;
-            border-radius: 10px;
-            margin-bottom: 20px;
-            display: none;
-        }
-
+        /* ===== DASHBOARD ===== */
         .dashboard {
             display: none;
             min-height: 100vh;
-            animation: fadeInUp 0.6s ease;
+            position: relative;
+            z-index: 1;
         }
 
+        /* ===== ADMIN NAV ===== */
         .admin-nav {
             position: fixed;
             top: 0;
@@ -180,17 +279,15 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            animation: slideDown 0.6s ease;
-        }
-
-        @keyframes slideDown {
-            from { transform: translateY(-100%); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
+            backdrop-filter: blur(20px);
         }
 
         .admin-nav .logo {
-            font-size: 22px;
+            font-size: 24px;
             font-weight: 800;
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
 
         .admin-nav .logo .blaze {
@@ -198,6 +295,15 @@
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
+        }
+
+        .admin-nav .logo .admin-badge {
+            font-size: 12px;
+            background: var(--primary);
+            color: white;
+            padding: 2px 12px;
+            border-radius: 50px;
+            font-weight: 600;
         }
 
         .admin-nav .admin-info {
@@ -211,6 +317,7 @@
             align-items: center;
             gap: 8px;
             font-size: 13px;
+            font-weight: 500;
         }
 
         .admin-nav .admin-info .status .dot {
@@ -218,13 +325,19 @@
             height: 10px;
             border-radius: 50%;
             display: inline-block;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.2); }
         }
 
         .admin-nav .admin-info .status .dot.online { background: var(--success); }
         .admin-nav .admin-info .status .dot.offline { background: var(--secondary); }
 
         .admin-nav .admin-info .logout-btn {
-            padding: 8px 20px;
+            padding: 8px 24px;
             border-radius: 50px;
             border: none;
             background: var(--secondary);
@@ -232,16 +345,20 @@
             font-weight: 600;
             cursor: pointer;
             transition: var(--transition);
+            font-family: 'Poppins', sans-serif;
         }
 
         .admin-nav .admin-info .logout-btn:hover {
             transform: scale(1.05);
+            box-shadow: 0 4px 20px rgba(255,107,107,0.3);
         }
 
+        /* ===== CONTENT ===== */
         .admin-content {
-            padding: 90px 5% 40px;
+            padding: 100px 5% 40px;
         }
 
+        /* ===== STATS ===== */
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -252,18 +369,12 @@
         .stat-card {
             background: var(--card);
             padding: 25px;
-            border-radius: 15px;
+            border-radius: 16px;
             border: 1px solid var(--glass-border);
             text-align: center;
             transition: var(--transition);
-            animation: fadeInUp 0.6s ease forwards;
-            opacity: 0;
+            backdrop-filter: blur(10px);
         }
-
-        .stat-card:nth-child(1) { animation-delay: 0.1s; }
-        .stat-card:nth-child(2) { animation-delay: 0.2s; }
-        .stat-card:nth-child(3) { animation-delay: 0.3s; }
-        .stat-card:nth-child(4) { animation-delay: 0.4s; }
 
         .stat-card:hover {
             transform: translateY(-5px);
@@ -271,7 +382,7 @@
         }
 
         .stat-card .number {
-            font-size: 32px;
+            font-size: 34px;
             font-weight: 800;
             background: linear-gradient(135deg, var(--primary), var(--secondary));
             -webkit-background-clip: text;
@@ -283,8 +394,17 @@
             font-size: 14px;
             color: var(--muted);
             margin-top: 5px;
+            font-weight: 500;
         }
 
+        .stat-card .icon {
+            font-size: 24px;
+            color: var(--primary);
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        /* ===== CONTROLS ===== */
         .admin-controls {
             display: flex;
             gap: 15px;
@@ -293,7 +413,7 @@
         }
 
         .admin-controls button {
-            padding: 12px 24px;
+            padding: 12px 28px;
             border-radius: 12px;
             border: none;
             font-weight: 600;
@@ -301,7 +421,9 @@
             transition: var(--transition);
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 10px;
+            font-family: 'Poppins', sans-serif;
+            font-size: 14px;
         }
 
         .admin-controls .btn-online {
@@ -309,9 +431,19 @@
             color: #000;
         }
 
+        .admin-controls .btn-online:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 20px rgba(0,255,136,0.3);
+        }
+
         .admin-controls .btn-offline {
             background: var(--secondary);
             color: white;
+        }
+
+        .admin-controls .btn-offline:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 20px rgba(255,107,107,0.3);
         }
 
         .admin-controls .btn-refresh {
@@ -319,17 +451,19 @@
             color: white;
         }
 
-        .admin-controls button:hover {
+        .admin-controls .btn-refresh:hover {
             transform: translateY(-2px);
+            box-shadow: 0 4px 20px rgba(108,99,255,0.3);
         }
 
+        /* ===== SECTION ===== */
         .admin-section {
             background: var(--card);
-            border-radius: 15px;
+            border-radius: 16px;
             border: 1px solid var(--glass-border);
             overflow: hidden;
             margin-bottom: 30px;
-            animation: fadeInUp 0.8s ease;
+            backdrop-filter: blur(10px);
         }
 
         .admin-section .header {
@@ -342,11 +476,21 @@
 
         .admin-section .header h3 {
             font-size: 18px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .admin-section .header h3 i {
+            color: var(--primary);
         }
 
         .admin-section .header .count {
             color: var(--muted);
             font-size: 14px;
+            background: var(--glass);
+            padding: 4px 14px;
+            border-radius: 50px;
         }
 
         .admin-section .body {
@@ -356,19 +500,29 @@
         .admin-section .body .empty {
             text-align: center;
             color: var(--muted);
-            padding: 20px;
+            padding: 30px;
+            font-size: 14px;
         }
 
+        /* ===== SUPPORT NUMBERS ===== */
         .support-number-item {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 12px 0;
+            padding: 14px 0;
             border-bottom: 1px solid var(--glass-border);
+            transition: var(--transition);
         }
 
         .support-number-item:last-child {
             border-bottom: none;
+        }
+
+        .support-number-item:hover {
+            background: var(--glass);
+            margin: 0 -10px;
+            padding: 14px 10px;
+            border-radius: 10px;
         }
 
         .support-number-item .info {
@@ -378,12 +532,12 @@
         }
 
         .support-number-item .info .flag {
-            font-size: 24px;
+            font-size: 28px;
         }
 
         .support-number-item .info .details .name {
             font-weight: 600;
-            font-size: 14px;
+            font-size: 15px;
         }
 
         .support-number-item .info .details .country {
@@ -394,10 +548,11 @@
         .support-number-item .info .details .number {
             font-size: 14px;
             color: var(--primary);
+            font-weight: 500;
         }
 
         .support-number-item .actions button {
-            padding: 6px 14px;
+            padding: 6px 16px;
             border-radius: 8px;
             border: none;
             font-size: 12px;
@@ -406,12 +561,15 @@
             transition: var(--transition);
             background: var(--secondary);
             color: white;
+            font-family: 'Poppins', sans-serif;
         }
 
         .support-number-item .actions button:hover {
             transform: scale(1.05);
+            box-shadow: 0 4px 20px rgba(255,107,107,0.3);
         }
 
+        /* ===== ADD FORM ===== */
         .add-support-form {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -419,7 +577,7 @@
             margin-top: 15px;
         }
 
-        .add-support-form input, .add-support-form select {
+        .add-support-form input {
             padding: 12px 16px;
             border-radius: 10px;
             border: 2px solid var(--glass-border);
@@ -430,9 +588,14 @@
             font-family: 'Poppins', sans-serif;
         }
 
-        .add-support-form input:focus, .add-support-form select:focus {
+        .add-support-form input:focus {
             outline: none;
             border-color: var(--primary);
+            box-shadow: 0 0 20px rgba(108,99,255,0.1);
+        }
+
+        .add-support-form input::placeholder {
+            color: var(--muted);
         }
 
         .add-support-form .full-width {
@@ -449,40 +612,21 @@
             cursor: pointer;
             transition: var(--transition);
             font-family: 'Poppins', sans-serif;
+            font-size: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
         }
 
         .add-support-form button:hover {
             transform: translateY(-2px);
-            box-shadow: 0 4px 20px rgba(108, 99, 255, 0.4);
+            box-shadow: 0 4px 30px rgba(108,99,255,0.4);
         }
 
-        .messages-section {
-            background: var(--card);
-            border-radius: 15px;
-            border: 1px solid var(--glass-border);
-            overflow: hidden;
-            animation: fadeInUp 0.8s ease;
-        }
-
-        .messages-section .header {
-            padding: 20px 25px;
-            border-bottom: 1px solid var(--glass-border);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .messages-section .header h3 {
-            font-size: 18px;
-        }
-
-        .messages-section .header .count {
-            color: var(--muted);
-            font-size: 14px;
-        }
-
+        /* ===== MESSAGES ===== */
         .message-item {
-            padding: 18px 25px;
+            padding: 16px 0;
             border-bottom: 1px solid var(--glass-border);
             display: flex;
             justify-content: space-between;
@@ -490,8 +634,15 @@
             transition: var(--transition);
         }
 
+        .message-item:last-child {
+            border-bottom: none;
+        }
+
         .message-item:hover {
             background: var(--glass);
+            margin: 0 -10px;
+            padding: 16px 10px;
+            border-radius: 10px;
         }
 
         .message-item .message-info {
@@ -501,6 +652,9 @@
         .message-item .message-info .user {
             font-weight: 600;
             font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
 
         .message-item .message-info .text {
@@ -512,6 +666,8 @@
         .message-item .message-info .time {
             font-size: 11px;
             color: var(--muted);
+            margin-top: 3px;
+            display: block;
         }
 
         .message-item .message-actions {
@@ -520,13 +676,14 @@
         }
 
         .message-item .message-actions button {
-            padding: 6px 14px;
+            padding: 6px 16px;
             border-radius: 8px;
             border: none;
             font-size: 12px;
             font-weight: 600;
             cursor: pointer;
             transition: var(--transition);
+            font-family: 'Poppins', sans-serif;
         }
 
         .message-item .message-actions .reply-btn {
@@ -534,13 +691,19 @@
             color: white;
         }
 
+        .message-item .message-actions .reply-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 20px rgba(108,99,255,0.3);
+        }
+
         .message-item .message-actions .delete-btn {
             background: var(--secondary);
             color: white;
         }
 
-        .message-item .message-actions button:hover {
+        .message-item .message-actions .delete-btn:hover {
             transform: scale(1.05);
+            box-shadow: 0 4px 20px rgba(255,107,107,0.3);
         }
 
         .message-item .badge-admin {
@@ -550,9 +713,9 @@
             border-radius: 50px;
             font-size: 10px;
             font-weight: 600;
-            margin-left: 10px;
         }
 
+        /* ===== MODAL ===== */
         .modal {
             display: none;
             position: fixed;
@@ -565,6 +728,7 @@
             align-items: center;
             justify-content: center;
             padding: 20px;
+            backdrop-filter: blur(10px);
         }
 
         .modal.active {
@@ -578,11 +742,33 @@
             max-width: 500px;
             width: 100%;
             border: 1px solid var(--glass-border);
-            animation: fadeInUp 0.3s ease;
+            animation: modalIn 0.3s ease;
+        }
+
+        @keyframes modalIn {
+            from { opacity: 0; transform: scale(0.9) translateY(20px); }
+            to { opacity: 1; transform: scale(1) translateY(0); }
         }
 
         .modal-content h3 {
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .modal-content h3 i {
+            color: var(--primary);
+        }
+
+        .modal-content .modal-user {
+            color: var(--muted);
+            font-size: 14px;
             margin-bottom: 15px;
+        }
+
+        .modal-content .modal-user strong {
+            color: var(--text);
         }
 
         .modal-content textarea {
@@ -593,14 +779,20 @@
             background: var(--bg);
             color: var(--text);
             font-size: 14px;
-            min-height: 100px;
+            min-height: 120px;
             resize: vertical;
-            font-family: inherit;
+            font-family: 'Poppins', sans-serif;
+            transition: var(--transition);
         }
 
         .modal-content textarea:focus {
             outline: none;
             border-color: var(--primary);
+            box-shadow: 0 0 20px rgba(108,99,255,0.1);
+        }
+
+        .modal-content textarea::placeholder {
+            color: var(--muted);
         }
 
         .modal-actions {
@@ -617,6 +809,7 @@
             font-weight: 600;
             cursor: pointer;
             transition: var(--transition);
+            font-family: 'Poppins', sans-serif;
         }
 
         .modal-actions .send-btn {
@@ -624,15 +817,21 @@
             color: white;
         }
 
+        .modal-actions .send-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 20px rgba(108,99,255,0.3);
+        }
+
         .modal-actions .cancel-btn {
             background: var(--glass);
             color: var(--text);
         }
 
-        .modal-actions button:hover {
+        .modal-actions .cancel-btn:hover {
             transform: scale(1.05);
         }
 
+        /* ===== RESPONSIVE ===== */
         @media (max-width: 768px) {
             .login-box { padding: 30px; }
             .stats-grid { grid-template-columns: repeat(2, 1fr); }
@@ -642,18 +841,39 @@
             .admin-controls button { width: 100%; justify-content: center; }
             .add-support-form { grid-template-columns: 1fr; }
             .support-number-item { flex-direction: column; align-items: flex-start; gap: 10px; }
+            .admin-nav .logo { font-size: 18px; }
+            .admin-nav .admin-info { gap: 10px; }
+            .admin-nav .admin-info .status { font-size: 11px; }
+            .admin-nav .admin-info .logout-btn { padding: 6px 16px; font-size: 12px; }
+        }
+
+        @media (max-width: 480px) {
+            .login-box { padding: 20px; }
+            .stats-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
+            .stat-card { padding: 15px; }
+            .stat-card .number { font-size: 24px; }
+            .admin-section .header { flex-direction: column; gap: 10px; text-align: center; }
         }
     </style>
 </head>
 <body>
+    <!-- ===== FLOATING BACKGROUND ===== -->
+    <div class="floating-bg">
+        <div class="floating-element"></div>
+        <div class="floating-element"></div>
+        <div class="floating-element"></div>
+    </div>
+    <div class="particles" id="particles"></div>
+
     <!-- ===== LOGIN ===== -->
     <div class="login-container" id="loginPage">
         <div class="login-box">
             <div class="logo-text">
                 <span class="blaze">Blaze</span>XMD
             </div>
-            <h1>Admin Panel</h1>
-            <p class="subtitle">Secure access for Blaze XMD administrators</p>
+            <div class="logo-sub">Administrator Panel</div>
+            <h1>Welcome Back</h1>
+            <p class="subtitle">Login to manage your Blaze XMD bot</p>
             
             <div class="login-error" id="loginError">
                 <i class="fas fa-exclamation-circle"></i> Invalid username or password
@@ -661,15 +881,15 @@
             
             <form id="loginForm" onsubmit="handleLogin(event)">
                 <div class="form-group">
-                    <label>Username</label>
-                    <input type="text" id="username" value="admin" required>
+                    <label><i class="fas fa-user"></i> Username</label>
+                    <input type="text" id="username" value="admin" required placeholder="Enter username">
                 </div>
                 <div class="form-group">
-                    <label>Password</label>
-                    <input type="password" id="password" value="BlazeXMD2024" required>
+                    <label><i class="fas fa-lock"></i> Password</label>
+                    <input type="password" id="password" value="BlazeXMD2024" required placeholder="Enter password">
                 </div>
                 <button type="submit" class="login-btn">
-                    <i class="fas fa-lock"></i> Login
+                    <i class="fas fa-sign-in-alt"></i> Login
                 </button>
             </form>
         </div>
@@ -681,7 +901,7 @@
         <nav class="admin-nav">
             <div class="logo">
                 <span class="blaze">Blaze</span>XMD
-                <span style="font-size:12px;color:var(--muted);font-weight:400;">Admin</span>
+                <span class="admin-badge">Admin</span>
             </div>
             <div class="admin-info">
                 <div class="status">
@@ -699,18 +919,22 @@
             <!-- Stats -->
             <div class="stats-grid" id="statsGrid">
                 <div class="stat-card">
+                    <span class="icon"><i class="fas fa-comments"></i></span>
                     <div class="number" id="statMessages">0</div>
                     <div class="label">Total Messages</div>
                 </div>
                 <div class="stat-card">
+                    <span class="icon"><i class="fas fa-users"></i></span>
                     <div class="number" id="statUsers">0</div>
                     <div class="label">Total Users</div>
                 </div>
                 <div class="stat-card">
+                    <span class="icon"><i class="fas fa-link"></i></span>
                     <div class="number" id="statPairs">0</div>
                     <div class="label">Active Pairs</div>
                 </div>
                 <div class="stat-card">
+                    <span class="icon"><i class="fas fa-clock"></i></span>
                     <div class="number" id="statPending">0</div>
                     <div class="label">Pending Pairs</div>
                 </div>
@@ -729,7 +953,7 @@
                 </button>
             </div>
 
-            <!-- Support Numbers Management -->
+            <!-- Support Numbers -->
             <div class="admin-section">
                 <div class="header">
                     <h3><i class="fas fa-phone"></i> Support Numbers</h3>
@@ -740,12 +964,14 @@
                         <div class="empty">No support numbers added yet.</div>
                     </div>
                     
-                    <h4 style="margin-top:20px;margin-bottom:10px;">Add New Support Number</h4>
+                    <h4 style="margin-top:25px;margin-bottom:12px;font-size:16px;">
+                        <i class="fas fa-plus-circle" style="color:var(--primary);"></i> Add New Support Number
+                    </h4>
                     <form class="add-support-form" onsubmit="addSupportNumber(event)">
                         <input type="text" id="supportName" placeholder="Name (e.g. John)" required>
                         <input type="text" id="supportCountry" placeholder="Country (e.g. USA)" required>
-                        <input type="text" id="supportFlag" placeholder="Flag Emoji (e.g. 🇺🇸)" required>
-                        <input type="text" id="supportNumber" placeholder="Phone Number (e.g. +1 555 123 4567)" required>
+                        <input type="text" id="supportFlag" placeholder="Flag (e.g. 🇺🇸)" required>
+                        <input type="text" id="supportNumber" placeholder="Phone (e.g. +1 555 123 4567)" required>
                         <button type="submit" class="full-width">
                             <i class="fas fa-plus"></i> Add Support Number
                         </button>
@@ -754,13 +980,13 @@
             </div>
 
             <!-- Messages -->
-            <div class="messages-section">
+            <div class="admin-section messages-section">
                 <div class="header">
-                    <h3><i class="fas fa-comments"></i> Live Messages</h3>
+                    <h3><i class="fas fa-envelope"></i> Live Messages</h3>
                     <span class="count" id="messageCount">0 messages</span>
                 </div>
-                <div id="messagesList">
-                    <div style="text-align:center;color:var(--muted);padding:40px;">
+                <div class="body" id="messagesList">
+                    <div class="empty">
                         <i class="fas fa-spinner fa-spin"></i> Loading messages...
                     </div>
                 </div>
@@ -772,9 +998,9 @@
     <div class="modal" id="replyModal">
         <div class="modal-content">
             <h3><i class="fas fa-reply"></i> Reply to User</h3>
-            <p style="color:var(--muted);font-size:14px;margin-bottom:15px;">
+            <div class="modal-user">
                 Replying to: <strong id="replyUserName">User</strong>
-            </p>
+            </div>
             <textarea id="replyMessage" placeholder="Type your reply..."></textarea>
             <div class="modal-actions">
                 <button class="cancel-btn" onclick="closeReplyModal()">Cancel</button>
@@ -789,6 +1015,22 @@
         let token = localStorage.getItem('adminToken');
         let currentReplyUserId = null;
         let currentReplyUserName = '';
+
+        // ===== PARTICLES =====
+        function createParticles() {
+            const container = document.getElementById('particles');
+            for (let i = 0; i < 30; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle-float';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.animationDuration = (12 + Math.random() * 18) + 's';
+                particle.style.animationDelay = (Math.random() * 15) + 's';
+                particle.style.width = (2 + Math.random() * 3) + 'px';
+                particle.style.height = particle.style.width;
+                container.appendChild(particle);
+            }
+        }
+        createParticles();
 
         // ===== LOGIN =====
         async function handleLogin(e) {
@@ -837,7 +1079,6 @@
             showLogin();
         }
 
-        // Check if already logged in
         if (token) {
             showDashboard();
             loadData();
@@ -848,7 +1089,7 @@
             if (!token) return;
 
             try {
-                // Load stats
+                // Stats
                 const statsRes = await fetch('/api/admin/stats', {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
@@ -859,7 +1100,7 @@
                 document.getElementById('statPairs').textContent = stats.totalPairs || 0;
                 document.getElementById('statPending').textContent = stats.pendingPairs || 0;
 
-                // Load messages
+                // Messages
                 const msgRes = await fetch('/api/admin/messages?page=1&limit=50', {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
@@ -869,7 +1110,7 @@
                 
                 const list = document.getElementById('messagesList');
                 if (msgData.messages.length === 0) {
-                    list.innerHTML = '<div style="text-align:center;color:var(--muted);padding:40px;">No messages yet</div>';
+                    list.innerHTML = '<div class="empty">No messages yet</div>';
                 } else {
                     list.innerHTML = msgData.messages.map(m => `
                         <div class="message-item">
@@ -895,7 +1136,7 @@
                     `).join('');
                 }
 
-                // Load support numbers
+                // Support numbers
                 const supportRes = await fetch('/api/support/numbers');
                 const supportData = await supportRes.json();
                 
@@ -924,7 +1165,6 @@
                     `).join('');
                 }
 
-                // Update status
                 updateStatus(stats.adminOnline);
 
             } catch (e) {
@@ -1085,7 +1325,7 @@
             }
         }
 
-        // Auto-refresh every 30 seconds
+        // ===== AUTO REFRESH =====
         setInterval(loadData, 30000);
     </script>
 </body>
