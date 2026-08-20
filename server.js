@@ -18,7 +18,7 @@ const io = socketIO(server, {
   }
 });
 
-// ============ MIDDLEWARE ============
+// ============ MIDDLEWARE ===========
 app.use(cors());
 app.use(express.json());
 
